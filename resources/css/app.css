@@ -1,5 +1,28 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
+@import '@fortawesome/fontawesome-free/css/all.min.css';
 
-.product-img { height: 220px; object-fit: cover; cursor: pointer; }
-.dealer-slider-img { height: 420px; object-fit: cover; }
+/* Optimized UI Consistency Variables */
+:root {
+    --bs-primary: #106fbc; /* Matches SleepWell Blue */
+    --bs-primary-rgb: 16, 111, 188;
+    --bs-light: #f4f6f8;
+}
+
+.bg-primary { background-color: var(--bs-primary) !important; }
+.text-primary { color: var(--bs-primary) !important; }
+.btn-primary { 
+    background-color: var(--bs-primary); 
+    border-color: var(--bs-primary); 
+}
+.btn-primary:hover {
+    background-color: #0b5fa2;
+    border-color: #0b5fa2;
+}
+
+/* Image Handling */
+.product-img { height: 220px; object-fit: contain; cursor: pointer; }
+.native-modal-img { height: 350px; object-fit: contain; }
+
+/* Custom Overrides (Minimal) */
+.nav-link.active { color: var(--bs-primary) !important; font-weight: 600 !important; }
