@@ -1,0 +1,5 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+.product-img { height: 220px; object-fit: cover; cursor: pointer; }
+.dealer-slider-img { height: 420px; object-fit: cover; }
