@@ -313,3 +313,107 @@
         
     </section>
 </x-layout>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Quantity Adjuster Core Logic Rules
+    const qtyInput = document.getElementById('modal-qty');
+    const btnMinus = document.getElementById('btn-qty-minus');
+    const btnPlus = document.getElementById('btn-qty-plus');
+
+    btnMinus?.addEventListener('click', () => {
+        let currentVal = parseInt(qtyInput.value) || 1;
+        if (currentVal > 1) qtyInput.value = currentVal - 1;
+    });
+
+    btnPlus?.addEventListener('click', () => {
+        let currentVal = parseInt(qtyInput.value) || 1;
+        let maxStock = parseInt(qtyInput.getAttribute('max')) || 99;
+        if (currentVal < maxStock) qtyInput.value = currentVal + 1;
+    });
+
+    // 2. Dynamic Modal Data Hydration Engine
+    const productModal = document.getElementById('productModal');
+    if (productModal) {
+        productModal.addEventListener('show.bs.modal', function (event) {
+            const trigger = event.relatedTarget;
+            
+            // Extract data attributes from the clicked card/image trigger
+            const title = trigger.getAttribute('data-title') || 'Product Details';
+            const price = trigger.getAttribute('data-price') || '0.00';
+            const description = trigger.getAttribute('data-description') || '';
+            const image = trigger.getAttribute('data-image') || '';
+            const stock = trigger.getAttribute('data-stock') || '10';
+            const id = trigger.getAttribute('data-id') || '';
+            
+            let dealers = [];
+            try {
+                dealers = JSON.parse(trigger.getAttribute('data-dealers') || '[]');
+            } catch (e) {
+                dealers = [];
+            }
+
+            // Hydrate text nodes and media sources safely
+            document.getElementById('modalProductTitle').textContent = title;
+            document.getElementById('modalProductPrice').textContent = '₹' + parseFloat(price).toLocaleString('en-IN');
+            document.getElementById('modalProductDescription').textContent = description;
+            
+            const modalImg = document.getElementById('modalProductImage');
+            if (modalImg) modalImg.src = image;
+
+            // Reset operational inputs
+            qtyInput.value = 1;
+            qtyInput.setAttribute('max', stock);
+            
+            const cartBtn = productModal.querySelector('.add-to-cart-btn');
+            if (cartBtn) cartBtn.setAttribute('data-id', id);
+
+            // Rebuild dealer row matrix templates dynamically
+            const dealerListContainer = document.getElementById('dealerListContainer');
+            if (dealerListContainer) {
+                dealerListContainer.innerHTML = '';
+                
+                if (dealers.length === 0) {
+                    dealerListContainer.innerHTML = `
+                        <div class="p-3 text-center text-muted fst-italic bg-light rounded-3">
+                            No other dealers are handling this item currently.
+                        </div>`;
+                } else {
+                    let tableRows = dealers.map(dealer => `
+                        <tr class="border-bottom border-light-subtle">
+                            <td class="fw-semibold text-dark py-3">${dealer.dealer_name}</td>
+                            <td class="text-muted py-3">${title}</td>
+                            <td class="text-success fw-bold py-3 text-end">₹${parseFloat(dealer.price).toLocaleString('en-IN')}</td>
+                        </tr>
+                    `).join('');
+
+                    dealerListContainer.innerHTML = `
+                        <div class="table-responsive bg-white rounded-3 p-2">
+                            <table class="table table-borderless align-middle mb-0 small">
+                                <thead>
+                                    <tr class="border-bottom border-light-subtle text-muted">
+                                        <th class="py-2">Dealer Name</th>
+                                        <th class="py-2">Product Name</th>
+                                        <th class="py-2 text-end">Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>`;
+                }
+            }
+
+            // Collapse the display panel on fresh modal loads automatically
+            const collapseElement = document.getElementById('dealersCollapse');
+            if (collapseElement && collapseElement.classList.contains('show')) {
+                const bsCollapse = bootstrap.Collapse.getInstance(collapseElement);
+                bsCollapse?.hide();
+            }
+        });
+    }
+});
+</script>
+@endpush

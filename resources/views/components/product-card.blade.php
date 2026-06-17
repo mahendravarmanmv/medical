@@ -5,34 +5,53 @@
         
         <!-- DYNAMIC TOP LEFT BADGE HOOK LAYER -->
         @if($product->badge_text)
-            <span class="badge {{ $product->badge_color ?? 'bg-secondary' }} position-absolute top-0 start-0 m-3 px-2 py-1 rounded-1 fw-bold tracking-wider fs-8 small shadow-sm" style="z-index: 5;">
+            <span class="badge {{ $product->badge_color ?? 'bg-secondary' }} position-absolute top-0 start-0 m-3 px-2 py-1 rounded-1 fw-bold tracking-wider fs-8 small shadow-sm z-3">
                 {{ $product->badge_text }}
             </span>
         @endif
 
         <!-- IMMUTABLE CENTER SIZED PRODUCT GRAPHIC ANCHOR -->
-        <div class="p-4 d-flex align-items-center justify-content-center bg-white rounded-top-2" style="height: 200px;">
-            <img src="{{ $product->image_url }}" 
-                 class="img-fluid open-product-modal object-fit-contain h-100 w-100" 
-                 data-id="{{ $product->id }}" 
-                 style="cursor: pointer; transition: transform 0.2s;"
-                 onmouseover="this.style.transform='scale(1.03)'"
-                 onmouseout="this.style.transform='scale(1.0)'"
-                 alt="{{ $product->title }}">
+        <!-- Replaced explicit 200px height with Bootstrap flex-grow and ratio controls -->
+        <div class="p-4 d-flex align-items-center justify-content-center bg-white rounded-top-2 flex-grow-1">
+            <a href="#" class="d-flex align-items-center justify-content-center h-100 w-100 open-product-modal pe-auto text-decoration-none"
+               data-bs-toggle="modal" 
+               data-bs-target="#productModal"
+               data-id="{{ $product->id }}"
+               data-title="{{ $product->title }}"
+               data-price="{{ $product->price }}"
+               data-description="{{ $product->description ?? 'No direct product summary context supplied.' }}"
+               data-image="{{ $product->image_url }}"
+               data-stock="{{ $product->stock ?? 20 }}"
+               data-dealers="{{ json_encode($product->dealers ?? []) }}">
+                <img src="{{ $product->image_url }}" 
+                     class="img-fluid object-fit-contain mw-100 mh-100" 
+                     alt="{{ $product->title }}">
+            </a>
         </div>
 
         <!-- PRODUCT METADATA INFO REGION CONTAINER -->
-        <div class="card-body p-3 d-flex flex-column justify-content-between pt-0">
+        <div class="card-body p-3 d-flex flex-column justify-content-between pt-0 flex-grow-0">
             
-            <div>
-                <!-- Title Label Heading -->
-                <h6 class="fw-bold text-dark lh-base mb-3 open-product-modal" data-id="{{ $product->id }}" style="cursor: pointer; min-height: 44px;">
+            <div class="d-flex flex-column">
+                <!-- Title Label Heading mapped securely using a clean link styling pattern -->
+                <!-- Removed min-height: Bootstrap's parent flex column will push pricing down evenly -->
+                <a href="#" class="fw-bold text-dark text-decoration-none lh-base mb-3 d-block open-product-modal pe-auto fs-6 link-underline-opacity-0" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#productModal"
+                    data-id="{{ $product->id }}"
+                    data-title="{{ $product->title }}"
+                    data-price="{{ $product->price }}"
+                    data-description="{{ $product->description ?? 'No direct product summary context supplied.' }}"
+                    data-image="{{ $product->image_url }}"
+                    data-stock="{{ $product->stock ?? 20 }}"
+                    data-dealers="{{ json_encode($product->dealers ?? []) }}">
                     {{ $product->title }}
-                </h6>
+                </a>
 
                 <!-- FEATURE BULLET SECTIONS DYNAMIC ARRAY GENERATOR LOOP -->
                 @if(is_array($product->key_features))
-                    <ul class="list-unstyled mb-4 text-secondary ps-0" style="font-size: 0.825rem; min-height: 88px;">
+                    <!-- Removed min-height: list items now occupy natural spacing bounds -->
+                    <ul class="list-unstyled mb-3 text-secondary ps-0 small">
                         @foreach($product->key_features as $feature)
                             <li class="mb-1 d-flex align-items-start">
                                 <span class="me-2 text-dark-emphasis opacity-50">•</span>
@@ -49,7 +68,7 @@
                     @if($product->id == 4) From @endif ₹{{ number_format($product->price, 0) }}
                 </h4>
                 @if($product->emi_starting_price)
-                    <div class="text-muted small fw-medium mt-1" style="font-size: 0.775rem;">
+                    <div class="text-muted small fw-medium mt-1">
                         EMI from ₹{{ number_format($product->emi_starting_price, 0) }}/month
                     </div>
                 @endif
@@ -61,17 +80,13 @@
         <div class="card-footer bg-white border-0 p-3 pt-0 mt-auto">
             <div class="d-flex flex-column gap-2">
                 <!-- Add to Cart Primary Button -->
-                <button class="btn btn-primary w-100 add-to-cart-btn fw-semibold rounded-1 py-2 d-flex align-items-center justify-content-center gap-2 text-white" 
-                        data-id="{{ $product->id }}" 
-                        style="background-color: #0b4d8c; border-color: #0b4d8c; font-size: 0.875rem;">
+                <button class="btn btn-primary w-100 add-to-cart-btn fw-semibold rounded-1 py-2 d-flex align-items-center justify-content-center gap-2 text-white border-0" 
+                        data-id="{{ $product->id }}">
                     <i class="bi bi-cart3 fs-6"></i> Add to Cart
                 </button>
                 
                 <!-- Request Demo Secondary Outline Button -->
-                <button class="btn btn-outline-secondary w-100 fw-semibold rounded-1 py-2 text-primary" 
-                        style="border-color: #cbd5e1; font-size: 0.875rem;"
-                        onmouseover="this.style.backgroundColor='#f8fafc'"
-                        onmouseout="this.style.backgroundColor='transparent'">
+                <button class="btn btn-outline-primary border-light-subtle text-primary w-100 fw-semibold rounded-1 py-2 small">
                     Request Demo
                 </button>
             </div>
