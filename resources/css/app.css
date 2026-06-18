@@ -26,3 +26,44 @@
 
 /* Custom Overrides (Minimal) */
 .nav-link.active { color: var(--bs-primary) !important; font-weight: 600 !important; }
+
+/* ========================================================================= */
+/* STRICT LAYOUT FORCED OVERRIDES: STOPS ALL MODAL SHIFTING & SHAKING        */
+/* ========================================================================= */
+
+/* 1. Prevent background page layout changes when the modal opens */
+body.modal-open {
+    padding-right: 0px !important;
+    overflow-y: scroll !important;
+}
+
+/* 2. Force the modal window to maintain an active scroll track from frame 1 */
+.modal {
+    overflow-y: scroll !important;
+}
+
+/* 3. Keep scrollbar gutters uniform across all standard viewports */
+html {
+    scrollbar-gutter: stable !important;
+}
+
+/* ========================================================================= */
+/* PREMIUM E-COMMERCE STYLING UTILITIES                                     */
+/* ========================================================================= */
+.badge-premium-hanging {
+    top: 4px;
+    left: -5px;
+    padding: 6px 12px;
+    font-size: 0.72rem;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+#testimonialCarousel .carousel-indicators button {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.testimonial-card {
+    min-height: 260px;
+}

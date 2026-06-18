@@ -4,15 +4,16 @@
     <div class="card h-100 border border-1 border-light-subtle rounded-2 shadow-sm position-relative d-flex flex-column bg-white">
         
         <!-- DYNAMIC TOP LEFT BADGE HOOK LAYER -->
+        <!-- CLEAN COMPONENT FIX: Replaced complex inline rules with a clean cached stylesheet class -->
         @if($product->badge_text)
-            <span class="badge {{ $product->badge_color ?? 'bg-secondary' }} position-absolute top-0 start-0 m-3 px-2 py-1 rounded-1 fw-bold tracking-wider fs-8 small shadow-sm z-3">
+            <span class="badge {{ $product->badge_color ?? 'bg-success' }} position-absolute fw-bold tracking-wider shadow-sm z-3 badge-premium-hanging">
                 {{ $product->badge_text }}
             </span>
         @endif
 
         <!-- IMMUTABLE CENTER SIZED PRODUCT GRAPHIC ANCHOR -->
-        <!-- Replaced explicit 200px height with Bootstrap flex-grow and ratio controls -->
-        <div class="p-4 d-flex align-items-center justify-content-center bg-white rounded-top-2 flex-grow-1">
+        <!-- Locked to a uniform 4:3 canvas size using pure Bootstrap 5 ratio utilities -->
+        <div class="ratio ratio-4x3 bg-white rounded-top-2 overflow-hidden p-3">
             <a href="#" class="d-flex align-items-center justify-content-center h-100 w-100 open-product-modal pe-auto text-decoration-none"
                data-bs-toggle="modal" 
                data-bs-target="#productModal"
@@ -24,17 +25,16 @@
                data-stock="{{ $product->stock ?? 20 }}"
                data-dealers="{{ json_encode($product->dealers ?? []) }}">
                 <img src="{{ $product->image_url }}" 
-                     class="img-fluid object-fit-contain mw-100 mh-100" 
+                     class="img-fluid object-fit-contain w-100 h-100 p-2" 
                      alt="{{ $product->title }}">
             </a>
         </div>
 
         <!-- PRODUCT METADATA INFO REGION CONTAINER -->
-        <div class="card-body p-3 d-flex flex-column justify-content-between pt-0 flex-grow-0">
+        <div class="card-body p-3 d-flex flex-column justify-content-between pt-0 flex-grow-1">
             
             <div class="d-flex flex-column">
                 <!-- Title Label Heading mapped securely using a clean link styling pattern -->
-                <!-- Removed min-height: Bootstrap's parent flex column will push pricing down evenly -->
                 <a href="#" class="fw-bold text-dark text-decoration-none lh-base mb-3 d-block open-product-modal pe-auto fs-6 link-underline-opacity-0" 
                     data-bs-toggle="modal" 
                     data-bs-target="#productModal"
@@ -50,7 +50,6 @@
 
                 <!-- FEATURE BULLET SECTIONS DYNAMIC ARRAY GENERATOR LOOP -->
                 @if(is_array($product->key_features))
-                    <!-- Removed min-height: list items now occupy natural spacing bounds -->
                     <ul class="list-unstyled mb-3 text-secondary ps-0 small">
                         @foreach($product->key_features as $feature)
                             <li class="mb-1 d-flex align-items-start">
