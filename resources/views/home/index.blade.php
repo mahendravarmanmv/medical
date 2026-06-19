@@ -568,6 +568,104 @@
 
 </section>
 
+<section class="bg-white rounded-3 px-3 py-4 mb-5">
+
+    <div class="row row-cols-2 row-cols-lg-5 g-3">
+
+        <div class="col">
+            <div class="d-flex align-items-start gap-2 h-100" style="min-height: 56px;">
+
+                <i class="bi bi-credit-card text-primary fs-4 flex-shrink-0"></i>
+
+                <div>
+                    <div class="fw-semibold small text-dark">
+                        Secure
+                    </div>
+
+                    <div class="small text-secondary">
+                        Payments
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="d-flex align-items-start gap-2 h-100" style="min-height: 56px;">
+
+                <i class="bi bi-arrow-repeat text-primary fs-4 flex-shrink-0"></i>
+
+                <div>
+                    <div class="fw-semibold small text-dark">
+                        7 Days Easy
+                    </div>
+
+                    <div class="small text-secondary">
+                        Returns
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="d-flex align-items-start gap-2 h-100" style="min-height: 56px;">
+
+                <i class="bi bi-wallet2 text-primary fs-4 flex-shrink-0"></i>
+
+                <div>
+                    <div class="fw-semibold small text-dark">
+                        EMI Options
+                    </div>
+
+                    <div class="small text-secondary">
+                        Available
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="d-flex align-items-start gap-2 h-100" style="min-height: 56px;">
+
+                <i class="bi bi-shield-check text-primary fs-4 flex-shrink-0"></i>
+
+                <div>
+                    <div class="fw-semibold small text-dark">
+                        100% Genuine
+                    </div>
+
+                    <div class="small text-secondary">
+                        Products
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="d-flex align-items-start gap-2 h-100" style="min-height: 56px;">
+
+                <i class="bi bi-shield-lock text-primary fs-4 flex-shrink-0"></i>
+
+                <div>
+                    <div class="fw-semibold small text-dark">
+                        Privacy
+                    </div>
+
+                    <div class="small text-secondary">
+                        Protected
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
     </section>
 </x-layout>
 
