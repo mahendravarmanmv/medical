@@ -129,6 +129,24 @@
                 <div class="card border-0 shadow-sm sticky-top pt-2">
                     <div class="card-header bg-dark text-white fw-bold">Shop by Category</div>
                     <div class="card-body p-0">
+                        {{-- Default selected category --}}
+        <button
+            class="btn d-flex align-items-center justify-content-between w-100 py-3 ps-3 pe-3 border-0 rounded-0 bg-primary-subtle text-primary fw-bold">
+
+            <span class="d-flex align-items-center text-start">
+
+                <span class="d-inline-flex justify-content-center align-items-center me-3 fs-5"
+                      style="width: 2.5rem;">
+                    <i class="fas fa-th-large"></i>
+                </span>
+
+                <span>All Products</span>
+
+            </span>
+
+           
+
+        </button>
                         @foreach($categories as $category)
                         <div class="border-bottom">
 
@@ -150,7 +168,8 @@
                             <div class="collapse ps-5 pb-3" id="cat-{{ $category->id }}">
                                 @forelse($category->subcategories as $sub)
                                 <a href="#" class="d-block text-decoration-none py-1 text-secondary small">
-                                    {{ $sub->name }}
+                                    <i class="fas fa-chevron-right text-primary small"></i>
+                                    <span>{{ $sub->name }}</span>
                                 </a>
                                 @empty
                                 <span class="d-block text-muted small py-1 fst-italic">No subcategories</span>

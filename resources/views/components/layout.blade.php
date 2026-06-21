@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,11 +8,12 @@
     <title>{{ $title ?? 'SleepWell | Home' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+
 <body class="bg-light d-flex flex-column min-vh-100">
-    
+
     <section class="bg-primary text-white py-2 small fw-medium shadow-sm">
         <div class="container">
-            
+
             <div class="d-none d-xl-flex justify-content-between align-items-center text-nowrap">
                 <div class="d-flex gap-4">
                     <span><i class="fas fa-shipping-fast me-1"></i> Pan-India Delivery</span>
@@ -25,25 +27,25 @@
 
             <div id="topBarCarousel" class="carousel slide carousel-fade d-xl-none text-center" data-bs-ride="carousel" data-bs-interval="4000">
                 <div class="carousel-inner">
-                    
+
                     <div class="carousel-item active">
                         <span class="d-inline-flex align-items-center gap-1">
                             <i class="fas fa-shipping-fast"></i> Pan-India Delivery
                         </span>
                     </div>
-                    
+
                     <div class="carousel-item">
                         <span class="d-inline-flex align-items-center gap-1">
                             <i class="fas fa-percent"></i> EMI & Easy Finance Options
                         </span>
                     </div>
-                    
+
                     <div class="carousel-item">
                         <span class="d-inline-flex align-items-center gap-1">
                             <i class="fas fa-user-md"></i> Expert Sleep Support
                         </span>
                     </div>
-                    
+
                     <div class="carousel-item">
                         <span class="d-inline-flex align-items-center gap-1">
                             <span>Need Help? Talk to our expert:</span>
@@ -61,18 +63,18 @@
         <div class="container">
             <nav class="navbar navbar-expand-xl navbar-light py-2">
                 <div class="container-fluid px-0 d-flex align-items-center justify-content-between">
-                    
+
                     <a class="navbar-brand d-flex align-items-center m-0" href="{{ url('/') }}">
                         <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff" alt="SleepWell Logo" height="30" class="me-2 rounded">
                         <span class="fs-4 fw-bold text-dark">SleepWell</span>
                     </a>
-                    
+
                     <div class="d-flex align-items-center gap-3 order-xl-3 ms-auto me-3 me-xl-0">
                         <a href="#" class="text-secondary"><i class="fas fa-search"></i></a>
-                        <a href="#" class="text-secondary"><i class="fas fa-user-circle fs-5"></i></a>
-                        
+                        <a href="{{ url('/auth') }}" class="text-secondary"><i class="fas fa-user-circle fs-5"></i></a>
+
                         <button class="btn btn-dark rounded-pill px-3 px-sm-4 py-1.5 d-flex align-items-center gap-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#cartDrawer">
-                            <i class="bi bi-cart3"></i> 
+                            <i class="bi bi-cart3"></i>
                             <span class="d-none d-sm-inline small fw-semibold">Cart</span>
                             <span class="badge bg-danger rounded-pill" id="global-cart-count">
                                 {{ session('cart') ? count(session('cart')) : 0 }}
@@ -109,26 +111,26 @@
 
     <footer class="bg-dark text-white py-5 mt-5">
         <div class="container text-center">
-            <p class="mb-0 text-muted">© 2026 SleepWell Platform. Built with Laravel 13.</p>
+            <p class="mb-0">© 2026 SleepWell Platform. Built with Laravel 13.</p>
         </div>
     </footer>
 
-    <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="productModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-3">
-                
+
                 <div class="modal-header bg-white border-0 pt-3 pe-3 pb-0 justify-content-end position-relative" style="z-index: 1060;">
-    <button type="button" class="btn-close pe-auto" data-bs-dismiss="modal" aria-label="Close" style="cursor: pointer; position: relative; z-index: 1065;"></button>
-</div>
-                
+                    <button type="button" class="btn-close pe-auto" data-bs-dismiss="modal" aria-label="Close" style="cursor: pointer; position: relative; z-index: 1065;"></button>
+                </div>
+
                 <div class="modal-body p-4 pt-0">
                     <div class="row g-5">
-                        
+
                         <div class="col-lg-6">
                             <div class="d-flex align-items-center justify-content-center bg-white rounded-3 border border-light-subtle mb-3" style="height: 380px;">
                                 <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff" id="modalProductImage" class="img-fluid object-fit-contain h-100 p-3" alt="Active Frame View">
                             </div>
-                            
+
                             <div class="d-flex gap-2 overflow-x-auto pb-2 scrollbar-thin" style="white-space: nowrap;">
                                 <div class="border border-primary border-2 rounded p-1 bg-white cursor-pointer flex-shrink-0" style="width: 70px; height: 70px;">
                                     <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff" class="img-fluid object-fit-contain h-100 w-100" alt="Thumb 1">
@@ -145,7 +147,7 @@
                         <div class="col-lg-6 d-flex flex-column justify-content-between">
                             <div>
                                 <h2 class="fw-bold text-dark lh-sm fs-3 mb-2" id="modalProductTitle">AirSense™ 10 Autoset™ Tripack 4G CPAP Device with HumidAir and ClimateLineAir</h2>
-                                
+
                                 <div class="d-flex align-items-center gap-2 mb-4 small">
                                     <div class="text-warning">
                                         <i class="fas fa-star"></i>
@@ -164,7 +166,7 @@
                                     <span class="text-primary fw-bold fs-6">(26.91% off)</span>
                                 </div>
                                 <p class="text-muted small mb-4">MRP (Inclusive of all taxes)</p>
-                                
+
                                 <hr class="my-4 text-muted opacity-25">
 
                                 <div class="mb-4">
@@ -198,19 +200,18 @@
                                     <button class="btn btn-dark w-100 rounded-pill py-2.5 fw-bold add-to-cart-btn shadow-sm" data-id="">Add To Cart</button>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
                     <div class="border-top border-light-subtle pt-4 mt-5">
                         <div class="d-flex align-items-center justify-content-between">
                             <span class="fw-bold text-dark fs-6">Who other dealers available for this product?</span>
-                            <button class="btn btn-outline-primary rounded-pill px-3 fw-semibold text-decoration-none d-flex align-items-center gap-2" 
-                                    type="button" data-bs-toggle="collapse" data-bs-target="#dealersCollapse" aria-expanded="false" aria-controls="dealersCollapse">
+                            <button class="btn btn-outline-primary rounded-pill px-3 fw-semibold text-decoration-none d-flex align-items-center gap-2"
+                                type="button" data-bs-toggle="collapse" data-bs-target="#dealersCollapse" aria-expanded="false" aria-controls="dealersCollapse">
                                 View Dealers <i class="fas fa-chevron-down small"></i>
                             </button>
                         </div>
-                        
+
                         <div class="collapse" id="dealersCollapse">
                             <div id="dealerListContainer" class="pt-3">
                                 <div class="table-responsive bg-white rounded-3 p-2 border border-light-subtle">
@@ -250,6 +251,54 @@
         </div>
     </div>
 
+    <div class="modal fade" id="eligibilityModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden">
+
+                <div class="modal-header bg-dark text-white border-0 py-3 justify-content-center position-relative">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff" alt="SleepWell Logo" height="24" class="rounded">
+                        <span class="fw-bold tracking-wide fs-5">SleepWell Express</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3 shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4 text-center">
+                    <h3 class="fw-bold text-dark mb-2 fs-4">Check eligibility for 2hrs delivery</h3>
+                    <p class="text-muted small mb-4">Enter your area pincode to instantly unlock lightning-fast medical supply delivery near you.</p>
+
+                    <form id="pincodeCheckForm" class="mb-4">
+                        <div class="input-group border border-light-subtle rounded-3 p-1 bg-white shadow-sm">
+                            <span class="input-group-text bg-transparent border-0 text-secondary"><i class="fas fa-map-marker-alt"></i></span>
+                            <input type="text" maxlength="6" class="form-control bg-transparent border-0 fw-bold text-dark placeholder-muted shadow-none" placeholder="Enter 6-digit pincode" id="deliveryPincodeInput" required>
+                            <input type="submit" class="btn btn-primary rounded-2 px-4 fw-semibold" value="Verify">
+                        </div>
+                        <div id="pincodeFeedback" class="text-danger small mt-2 d-none"></div>
+                    </form>
+
+                    
+
+                    <div class="row g-2 pt-1">
+                        <div class="col-6">
+                            <!-- Directs to auth view, leaving the default Login tab active -->
+                            <a href="{{ url('/auth') }}" class="btn btn-outline-primary w-100 py-2 fw-semibold rounded-2 small d-flex align-items-center justify-content-center gap-2">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <!-- Directs to auth view and passes a custom query parameter for Sign Up -->
+                            <a href="{{ url('/auth?tab=signup') }}" class="btn btn-light border border-light-subtle text-dark w-100 py-2 fw-semibold rounded-2 small d-flex align-items-center justify-content-center gap-2">
+                                <i class="fas fa-user-plus"></i> Sign Up
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     @stack('scripts')
 </body>
+
 </html>
