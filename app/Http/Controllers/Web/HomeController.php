@@ -27,21 +27,42 @@ class HomeController extends Controller
         return view('home.index', compact('categories', 'products', 'sortOption'));
     }
 
-    public function getProductDetails(int $id): JsonResponse
+    public function getProductDetails(int $id): \Illuminate\Http\JsonResponse
     {
-        $product = Product::where('is_active', true)->findOrFail($id);
+        // Eager load galleryImages, packages, AND the intermediate dealer pivot structures
+        $product = Product::with(['galleryImages', 'packages', 'dealers'])
+            ->where('is_active', true)
+            ->findOrFail($id);
+
         return response()->json([
-            'id' => $product->id,
-            'title' => $product->title,
-            'description' => $product->description,
-            'price' => $product->price,
-            'image_url' => $product->image_url,
+            'id'          => $product->id,
+            'title'       => $product->title,
+            'description' => $product->description ?? 'No direct product summary context supplied.',
+            'price'       => $product->price,
+            'image_url'   => asset($product->image_url),
+            'stock'       => $product->stock_quantity ?? 20,
+            'packages'    => $product->packages->map(function ($pkg) {
+                return [
+                    'package_name' => $pkg->package_name,
+                    'price'        => $pkg->price,
+                    'emi'          => $pkg->emi_starting_price
+                ];
+            }),
+            'gallery'     => $product->galleryImages->map(function ($img) {
+                return asset($img->image_url);
+            }),
+
+            // FIX: Replaces the placeholder array with the real pivot collection
+            'dealers'     => $product->dealers->map(function ($dealer) {
+                return [
+                    'dealer_name' => $dealer->dealer_name,
+                    'price'       => $dealer->pivot->price // Pulls the specific price from pivot table
+                ];
+            })
         ]);
     }
-    /**
- * Dynamic View Render for AJAX offcanvas basket extraction
- */
-public function viewCart(): View
+
+    public function viewCart(): View
     {
         $cart = session()->get('cart', []);
         $total = 0;
@@ -50,29 +71,25 @@ public function viewCart(): View
             $total += $item['price'] * $item['quantity'];
         }
 
-        // Returns a clean partial Blade view frame isolate
         return view('cart.partials.drawer-items', compact('cart', 'total'));
     }
 
-/**
- * Handle Item Elimination Sessions Securely
- */
-public function removeFromCart(Request $request): JsonResponse
-{
-    $validated = $request->validate([
-        'product_id' => 'required|integer'
-    ]);
+    public function removeFromCart(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'product_id' => 'required|integer'
+        ]);
 
-    $cart = session()->get('cart', []);
+        $cart = session()->get('cart', []);
 
-    if (isset($cart[$validated['product_id']])) {
-        unset($cart[$validated['product_id']]);
-        session()->put('cart', $cart);
+        if (isset($cart[$validated['product_id']])) {
+            unset($cart[$validated['product_id']]);
+            session()->put('cart', $cart);
+        }
+
+        return response()->json([
+            'success' => true,
+            'cart_count' => count($cart)
+        ]);
     }
-
-    return response()->json([
-        'success' => true,
-        'cart_count' => count($cart)
-    ]);
-}
 }
