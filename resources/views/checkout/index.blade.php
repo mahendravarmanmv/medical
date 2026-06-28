@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
+<x-layout :title="'SleepWell | Secure Checkout'">
 <div class="container py-5">
     <div class="row g-4">
         
@@ -100,4 +98,4 @@
 
     </div>
 </div>
-@endsection
+</x-layout>
