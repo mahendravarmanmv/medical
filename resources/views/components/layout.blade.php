@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="auth-check" content="{{ auth()->check() ? '1' : '0' }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'SleepWell | Home' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -70,17 +71,38 @@
                     </a>
 
                     <div class="d-flex align-items-center gap-3 order-xl-3 ms-auto me-3 me-xl-0">
-                        <a href="#" class="text-secondary"><i class="fas fa-search"></i></a>
-                        <a href="{{ url('/auth') }}" class="text-secondary"><i class="fas fa-user-circle fs-5"></i></a>
+    <a href="#" class="text-secondary"><i class="fas fa-search"></i></a>
 
-                        <button class="btn btn-dark rounded-pill px-3 px-sm-4 py-1.5 d-flex align-items-center gap-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#cartDrawer">
-                            <i class="bi bi-cart3"></i>
-                            <span class="d-none d-sm-inline small fw-semibold">Cart</span>
-                            <span class="badge bg-danger rounded-pill" id="global-cart-count">
-                                {{ session('cart') ? count(session('cart')) : 0 }}
-                            </span>
+    @auth
+        <div class="dropdown">
+            <a href="#" class="text-secondary dropdown-toggle no-caret" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user-circle fs-5 text-primary"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-light-subtle rounded-2 mt-2">
+                <li><h6 class="dropdown-header small text-muted">Signed in as <br><span class="fw-bold text-dark">{{ auth()->user()->name }}</span></h6></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form action="{{ route('logout') }}" method="POST" class="d-block m-0">
+                        @csrf
+                        <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 py-2 small fw-medium">
+                            <i class="fas fa-sign-out-alt"></i> Sign Out
                         </button>
-                    </div>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    @else
+        <a href="{{ url('/auth') }}" class="text-secondary"><i class="fas fa-user-circle fs-5"></i></a>
+    @endauth
+
+    <button class="btn btn-dark rounded-pill px-3 px-sm-4 py-1.5 d-flex align-items-center gap-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#cartDrawer">
+        <i class="bi bi-cart3"></i>
+        <span class="d-none d-sm-inline small fw-semibold">Cart</span>
+        <span class="badge bg-danger rounded-pill" id="global-cart-count">
+            {{ session('cart') ? count(session('cart')) : 0 }}
+        </span>
+    </button>
+</div>
 
                     <button class="navbar-toggler order-xl-2 border-0 p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
@@ -117,7 +139,7 @@
 
     @include('components.modals.product-details-modal')
     @include('components.modals.eligibility-modal')
-    
+    @include('cart.partials.cart-drawer')
 
     @stack('scripts')
 </body>

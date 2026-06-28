@@ -58,85 +58,76 @@
     </section>
 
     <section class="container mb-4">
-        <div class="row">
+    <div class="row">
 
-            <div class="col-lg-3 mb-4">
-                <div class="card border-0 shadow-sm sticky-top pt-2">
-                    <div class="card-header bg-dark text-white fw-bold">Shop by Category</div>
-                    <div class="card-body p-0">
-                        {{-- Default selected category --}}
-        <button
-            class="btn d-flex align-items-center justify-content-between w-100 py-3 ps-3 pe-3 border-0 rounded-0 bg-primary-subtle text-primary fw-bold">
+        <div class="col-lg-3 mb-4">
+            <div class="card border-0 shadow-sm sticky-top pt-2" style="top: 20px;">
+                <div class="card-header bg-dark text-white fw-bold">Shop by Category</div>
+                <div class="card-body p-0">
+                    
+                    <button
+                        class="btn d-flex align-items-center justify-content-between w-100 py-3 ps-3 pe-3 border-0 rounded-0 bg-primary-subtle text-primary fw-bold js-category-filter active"
+                        data-slug="all">
+                        <span class="d-flex align-items-center text-start">
+                            <span class="d-inline-flex justify-content-center align-items-center me-3 fs-5" style="width: 2.5rem;">
+                                <i class="fas fa-th-large"></i>
+                            </span>
+                            <span>All Products</span>
+                        </span>
+                    </button>
 
-            <span class="d-flex align-items-center text-start">
+                    @foreach($categories as $category)
+                    <div class="border-bottom">
 
-                <span class="d-inline-flex justify-content-center align-items-center me-3 fs-5"
-                      style="width: 2.5rem;">
-                    <i class="fas fa-th-large"></i>
-                </span>
-
-                <span>All Products</span>
-
-            </span>
-
-           
-
-        </button>
-                        @foreach($categories as $category)
-                        <div class="border-bottom">
-
-                            <button class="btn d-flex align-items-center justify-content-between w-100 rounded-0 py-3 ps-3 pe-3 text-secondary fw-semibold fs-7 border-0"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#cat-{{ $category->id }}"
-                                aria-expanded="false">
-
-                                <span class="d-flex align-items-center text-start">
-                                    <span class="d-inline-flex justify-content-center align-items-center me-3 text-primary fs-5" style="width: 2.5rem;">
-                                        <i class="fas {{ $category->icon_class ?? 'fa-tag' }}"></i>
-                                    </span>
-                                    <span class="text-dark-emphasis text-wrap">{{ $category->name }}</span>
+                        <button class="btn d-flex align-items-center justify-content-between w-100 rounded-0 py-3 ps-3 pe-3 text-secondary fw-semibold fs-7 border-0"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#cat-{{ $category->id }}"
+                            aria-expanded="false">
+                            <span class="d-flex align-items-center text-start">
+                                <span class="d-inline-flex justify-content-center align-items-center me-3 text-primary fs-5" style="width: 2.5rem;">
+                                    <i class="fas {{ $category->icon_class ?? 'fa-tag' }}"></i>
                                 </span>
+                                <span class="text-dark-emphasis text-wrap">{{ $category->name }}</span>
+                            </span>
+                            <i class="fas fa-plus fa-xs text-muted ms-auto flex-shrink-0"></i>
+                        </button>
 
-                                <i class="fas fa-plus fa-xs text-muted ms-auto flex-shrink-0"></i>
-                            </button>
-
-                            <div class="collapse ps-5 pb-3" id="cat-{{ $category->id }}">
-                                @forelse($category->subcategories as $sub)
-                                <a href="#" class="d-block text-decoration-none py-1 text-secondary small">
-                                    <i class="fas fa-chevron-right text-primary small"></i>
-                                    <span>{{ $sub->name }}</span>
-                                </a>
-                                @empty
-                                <span class="d-block text-muted small py-1 fst-italic">No subcategories</span>
-                                @endforelse
-                            </div>
-
+                        <div class="collapse ps-5 pb-3" id="cat-{{ $category->id }}">
+                            @forelse($category->subcategories as $sub)
+                            <a href="#" class="d-block text-decoration-none py-1 text-secondary small js-category-filter" 
+                               data-slug="{{ $sub->slug }}">
+                                <i class="fas fa-chevron-right text-primary small"></i>
+                                <span>{{ $sub->name }}</span>
+                            </a>
+                            @empty
+                            <span class="d-block text-muted small py-1 fst-italic">No subcategories</span>
+                            @endforelse
                         </div>
-                        @endforeach
+
                     </div>
-                </div>
-            </div>
-
-            <div class="col-lg-9">
-
-                <div class="d-flex justify-content-between align-items-center mb-4 pt-2">
-                    <h4 class="fw-bold mb-0 text-primary">
-                        Featured Products
-                    </h4>
-                    <a href="#" class="text-decoration-none fw-semibold d-flex align-items-center gap-1 text-primary small">
-                        View All Products <i class="fas fa-chevron-right fs-8"></i>
-                    </a>
-                </div>
-
-                <div class="row g-3">
-                    @foreach($products as $product)
-                    <x-product-card :product="$product" />
                     @endforeach
                 </div>
-
             </div>
         </div>
-    </section>
+
+        <div class="col-lg-9">
+
+            <div class="d-flex justify-content-between align-items-center mb-4 pt-2">
+                <h4 class="fw-bold mb-0 text-primary">
+                    Featured Products
+                </h4>
+                <a href="#" class="text-decoration-none fw-semibold d-flex align-items-center gap-1 text-primary small">
+                    View All Products <i class="fas fa-chevron-right fs-8"></i>
+                </a>
+            </div>
+
+            <div class="row g-3" id="mainProductGridContainer">
+                @include('home.partials.product-grid')
+            </div>
+
+        </div>
+    </div>
+</section>
 
 
     <section class="container pb-5">

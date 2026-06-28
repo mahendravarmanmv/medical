@@ -5,25 +5,64 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\LogisticsEngine;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\JsonResponse;
 
 class HomeController extends Controller
 {
-    public function index(Request $request): View
+    // 1. Declare the logistics property explicitly
+    protected $logistics;
+
+    /**
+     * 2. Inject the LogisticsEngine into the Constructor
+     */
+    public function __construct(LogisticsEngine $logistics)
+    {
+        $this->logistics = $logistics;
+    }
+
+    public function index(Request $request)
     {
         $categories = Category::whereNull('parent_id')->with('subcategories')->get();
         $sortOption = $request->query('sort', 'latest');
+
+        // 1. Resolve active location pin code tracking contexts instantly
+        $pincode = $this->logistics->resolveCurrentPincode();
+        $assignedDealerId = $this->logistics->getAssignedDealerId($pincode);
+
+        // 2. Establish baseline active listing filters query track
         $productQuery = Product::where('is_active', true);
 
+        // RULE 1: Filter inventory to ONLY reveal items tied directly to the matched vendor profile
+        if ($assignedDealerId) {
+            $productQuery->whereHas('dealers', function ($query) use ($assignedDealerId) {
+                $query->where('dealer_id', $assignedDealerId);
+            });
+        }
+
+        // 3. Category selector tracking routines
+        if ($request->has('category_slug') && $request->input('category_slug') !== 'all') {
+            $slug = $request->input('category_slug');
+            $productQuery->whereHas('category', function ($query) use ($slug) {
+                $query->where('slug', $slug);
+            });
+        }
+
+        // Sort mappings
         $productQuery = match ($sortOption) {
             'low_price'  => $productQuery->orderBy('price', 'asc'),
             'high_price' => $productQuery->orderBy('price', 'desc'),
             default      => $productQuery->orderBy('created_at', 'desc'),
         };
 
-        $products = $productQuery->take(12)->get();
+        $products = $productQuery->get();
+
+        if ($request->ajax()) {
+            return view('home.partials.product-grid', compact('products'))->render();
+        }
+
         return view('home.index', compact('categories', 'products', 'sortOption'));
     }
 
@@ -90,6 +129,20 @@ class HomeController extends Controller
         return response()->json([
             'success' => true,
             'cart_count' => count($cart)
+        ]);
+    }
+
+    public function setLocationToken(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validated = $request->validate([
+            'pincode' => 'required|string|size:6'
+        ]);
+
+        session()->put('user_delivery_pincode', $validated['pincode']);
+
+        return response()->json([
+            'success' => true,
+            'pincode' => $validated['pincode']
         ]);
     }
 }
