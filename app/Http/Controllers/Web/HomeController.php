@@ -101,37 +101,6 @@ class HomeController extends Controller
         ]);
     }
 
-    public function viewCart(): View
-    {
-        $cart = session()->get('cart', []);
-        $total = 0;
-
-        foreach($cart as $item) {
-            $total += $item['price'] * $item['quantity'];
-        }
-
-        return view('cart.partials.drawer-items', compact('cart', 'total'));
-    }
-
-    public function removeFromCart(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'product_id' => 'required|integer'
-        ]);
-
-        $cart = session()->get('cart', []);
-
-        if (isset($cart[$validated['product_id']])) {
-            unset($cart[$validated['product_id']]);
-            session()->put('cart', $cart);
-        }
-
-        return response()->json([
-            'success' => true,
-            'cart_count' => count($cart)
-        ]);
-    }
-
     public function setLocationToken(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([

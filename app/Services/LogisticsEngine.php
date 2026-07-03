@@ -13,13 +13,25 @@ class LogisticsEngine
     /**
      * Resolves the active user contextual location token securely.
      */
+    /**
+     * Resolve the active user pincode with guaranteed string delivery
+     */
     public function resolveCurrentPincode(): string
     {
+        // 1. Check authenticated user profile data
         if (auth()->check() && !empty(auth()->user()->pincode)) {
-            return auth()->user()->pincode;
+            return (string) auth()->user()->pincode;
+        }
+        
+        // 2. Read session container context safely
+        $sessionPincode = session()->get('user_delivery_pincode');
+        if (!empty($sessionPincode)) {
+            return (string) $sessionPincode;
         }
 
-        return session()->get('user_delivery_pincode', self::DEFAULT_PINCODE);
+        // 3. Absolute fallback guarantee to prevent TypeErrors if everything else is null/empty
+        $defaultPincode = defined('self::DEFAULT_PINCODE') ? self::DEFAULT_PINCODE : '500090';
+        return (string) $defaultPincode;
     }
 
     /**

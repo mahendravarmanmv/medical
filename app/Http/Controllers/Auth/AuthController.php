@@ -28,15 +28,17 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|unique:users,email|max:255',
-            'password' => 'required|string|min:8|confirmed',
-            'pincode'  => 'required|string|size:6'
+            'pincode'  => 'required|string|size:6',
+            'phone'    => 'required|string|max:20', // Added validation for form field
+            'password' => 'required|string|min:8' // Removed confirmed rule to match your unified form inputs
         ]);
 
         $user = User::create([
             'name'     => $validated['name'],
             'email'    => $validated['email'],
-            'password' => Hash::make($validated['password']),
             'pincode'  => $validated['pincode'],
+            'phone'    => $validated['phone'], // Saves field to DB securely
+            'password' => Hash::make($validated['password']),
         ]);
 
         Auth::login($user);
@@ -44,7 +46,7 @@ class AuthController extends Controller
         // Sync session tracking with the user's permanent profile location token
         session()->put('user_delivery_pincode', $user->pincode);
 
-        return redirect()->route('home');
+        return redirect()->route('home')->with('success', 'Account registered and location synchronized successfully!');
     }
 
     /**
@@ -57,6 +59,7 @@ class AuthController extends Controller
             'password' => 'required|string'
         ]);
 
+        // FIX: Removed ', true' fallback so checking the state relies purely on the checkbox input
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             
@@ -66,7 +69,7 @@ class AuthController extends Controller
                 session()->put('user_delivery_pincode', $user->pincode);
             }
 
-            return redirect()->intended(route('home'));
+            return redirect()->intended(route('home'))->with('success', 'Secure authorization link established.');
         }
 
         return back()->withErrors([
@@ -83,6 +86,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        return redirect()->route('home');
+        return redirect()->route('home')->with('success', 'Session disconnected.');
     }
 }

@@ -356,8 +356,9 @@ $(document).ready(function () {
     $(document).on('click', '.js-category-filter', function (e) {
         e.preventDefault();
         
-        $('.js-category-filter').removeClass('active bg-primary text-white');
-        $(this).addClass('active bg-primary text-white');
+        // FIXED EXPLICITLY HERE: Strip out the old '.bg-primary text-white' string completely
+        $('.js-category-filter').removeClass('active');
+        $(this).addClass('active');
 
         let categorySlug = $(this).data('slug') || 'all';
         let appUrl = $('meta[name="app-url"]').attr('content') || '';
@@ -504,4 +505,33 @@ $(document).ready(function () {
     if ($('#invoice-total').length > 0) {
         refreshCheckoutInvoiceSummary();
     }
+
+    // -------------------------------------------------------------------------
+    // 7. MODAL QUANTITY INCREMENT & DECREMENT SYSTEM
+    // -------------------------------------------------------------------------
+    // Decrement handler (Minus Button click)
+    $(document).on('click', '#productModal button:contains("—"), #productModal .btn:has(i.fa-minus), #productModal button:first-of-type', function (e) {
+        e.preventDefault();
+        let qtyInput = $('#modal-qty');
+        if (qtyInput.length > 0) {
+            let currentVal = parseInt(qtyInput.val()) || 1;
+            if (currentVal > 1) {
+                qtyInput.val(currentVal - 1).trigger('change');
+            }
+        }
+    });
+
+    // Increment handler (Plus Button click)
+    $(document).on('click', '#productModal button:contains("+"), #productModal .btn:has(i.fa-plus), #productModal button:last-of-type', function (e) {
+        e.preventDefault();
+        let qtyInput = $('#modal-qty');
+        if (qtyInput.length > 0) {
+            let currentVal = parseInt(qtyInput.val()) || 1;
+            let maxLimit = parseInt(qtyInput.attr('max')) || 20;
+
+            if (currentVal < maxLimit) {
+                qtyInput.val(currentVal + 1).trigger('change');
+            }
+        }
+    });
 });

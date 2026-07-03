@@ -95,16 +95,25 @@ class CartController extends Controller
     /**
      * Return current session basket items bundle array map configurations
      */
-    public function viewCart(): JsonResponse
+    /**
+     * Compile and return the HTML fragment for the shopping cart offcanvas drawer.
+     */
+    public function viewCart(): \Illuminate\View\View
     {
-        // Force get the cart array context or default to empty
         $cart = session()->get('cart', []);
+        if (!is_array($cart)) {
+            $cart = [];
+        }
         
-        // Return clear, direct JSON data packets to the JavaScript handler engine
-        return response()->json([
-            'success' => true,
-            'cart'    => $cart
-        ]);
+        $total = 0;
+
+        foreach ($cart as $item) {
+            if (is_array($item) && isset($item['price'], $item['quantity'])) {
+                $total += (float)$item['price'] * (int)$item['quantity'];
+            }
+        }
+
+        return view('cart.partials.drawer-items', compact('cart', 'total'));
     }
 
     /**
@@ -137,12 +146,23 @@ class CartController extends Controller
     {
         $cart = session()->get('cart', []);
         
-        // Redirect back if user manually hits /checkout directly without selecting any goods first
         if (empty($cart)) {
             return redirect()->route('home')->with('warning', 'Your basket is currently empty.');
         }
 
-        return view('checkout.index');
+        // Calculate a safe baseline subtotal directly for the server-side render fallback
+        $subtotal = 0;
+        foreach ($cart as $item) {
+            if (is_array($item) && isset($item['price'], $item['quantity'])) {
+                $subtotal += (float)$item['price'] * (int)$item['quantity'];
+            }
+        }
+        
+        $gst = $subtotal * 0.18;
+        $finalPayable = $subtotal + $gst;
+
+        // Pass variables down into the slot view container component engine
+        return view('checkout.index', compact('cart', 'subtotal', 'gst', 'finalPayable'));
     }
 
     /**
@@ -163,7 +183,7 @@ class CartController extends Controller
             'pincode' => $pincode,
             'summary' => [
                 'subtotal'             => number_format($invoiceSummary['unit_price_subtotal'], 2),
-                'gst_tax'              => number_format($invoiceSummary['gst_tax_amount'], 2),
+                'gst'                  => number_format($invoiceSummary['gst_tax_amount'], 2), // FIXED KEY MATCHING FOR APP.JS LINE 527
                 'delivery'             => number_format($invoiceSummary['delivery_charges'], 2),
                 'installation'         => number_format($invoiceSummary['installation_charges'], 2),
                 'discounts'            => number_format($invoiceSummary['discount_deductions'], 2),

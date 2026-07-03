@@ -3,6 +3,20 @@
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-5">
                 
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show rounded-3 small mb-3 border-0 shadow-sm" role="alert">
+                        <i class="fas fa-check-circle me-1 text-success"></i> {{ session('success') }}
+                        <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="alert alert-danger alert-dismissible fade show rounded-3 small mb-3 border-0 shadow-sm" role="alert">
+                        <i class="fas fa-exclamation-circle me-1 text-danger"></i> {{ $errors->first() }}
+                        <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+
                 <div class="card border-0 shadow-sm rounded-3 bg-white overflow-hidden">
                     
                     <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
@@ -29,12 +43,13 @@
                                     <p class="text-muted small">Access your personalized sleep parameters and tracking logs</p>
                                 </div>
 
-                                <form action="#" method="POST" id="loginForm">
+                                <form action="{{ route('login.submit') }}" method="POST" id="loginForm">
+                                    @csrf
                                     <div class="mb-3">
                                         <label for="login_email" class="form-label small fw-bold text-dark">Email Address</label>
                                         <div class="input-group border border-light-subtle rounded-3 bg-white px-2 py-1 align-items-center">
                                             <span class="text-secondary ps-1"><i class="far fa-envelope"></i></span>
-                                            <input type="email" id="login_email" class="form-control bg-transparent border-0 shadow-none small" placeholder="name@example.com" required>
+                                            <input type="email" name="email" id="login_email" class="form-control bg-transparent border-0 shadow-none small" placeholder="name@example.com" required value="{{ old('email') }}">
                                         </div>
                                     </div>
 
@@ -45,13 +60,13 @@
                                         </div>
                                         <div class="input-group border border-light-subtle rounded-3 bg-white px-2 py-1 align-items-center">
                                             <span class="text-secondary ps-1"><i class="fas fa-lock"></i></span>
-                                            <input type="password" id="login_password" class="form-control bg-transparent border-0 shadow-none small" placeholder="••••••••" required>
+                                            <input type="password" name="password" id="login_password" class="form-control bg-transparent border-0 shadow-none small" placeholder="••••••••" required>
                                         </div>
                                     </div>
 
-                                    <div class="mb-4 form-check">
-                                        <input type="checkbox" class="form-check-input border-secondary-subtle" id="remember_me">
-                                        <label class="form-check-label text-muted small user-select-none" for="remember_me">Remember device session</label>
+                                    <div class="mb-4 form-check text-start">
+                                        <input type="checkbox" name="remember" class="form-check-input border-secondary-subtle cursor-pointer" id="remember_me">
+                                        <label class="form-check-label text-muted small user-select-none cursor-pointer" for="remember_me">Remember device session</label>
                                     </div>
 
                                     <button type="submit" class="btn btn-dark w-100 rounded-pill py-2.5 fw-bold shadow-sm mb-3">
@@ -66,12 +81,13 @@
                                     <p class="text-muted small">Register to coordinate setup guides and rapid equipment logistics</p>
                                 </div>
 
-                                <form action="#" method="POST" id="registerForm">
+                                <form action="{{ route('register.submit') }}" method="POST" id="registerForm">
+                                    @csrf
                                     <div class="mb-3">
                                         <label for="reg_name" class="form-label small fw-bold text-dark">Full Name</label>
                                         <div class="input-group border border-light-subtle rounded-3 bg-white px-2 py-1 align-items-center">
                                             <span class="text-secondary ps-1"><i class="far fa-user"></i></span>
-                                            <input type="text" id="reg_name" class="form-control bg-transparent border-0 shadow-none small" placeholder="John Doe" required>
+                                            <input type="text" name="name" id="reg_name" class="form-control bg-transparent border-0 shadow-none small" placeholder="John Doe" required value="{{ old('name') }}">
                                         </div>
                                     </div>
 
@@ -79,23 +95,32 @@
                                         <label for="reg_email" class="form-label small fw-bold text-dark">Email Address</label>
                                         <div class="input-group border border-light-subtle rounded-3 bg-white px-2 py-1 align-items-center">
                                             <span class="text-secondary ps-1"><i class="far fa-envelope"></i></span>
-                                            <input type="email" id="reg_email" class="form-control bg-transparent border-0 shadow-none small" placeholder="name@example.com" required>
+                                            <input type="email" name="email" id="reg_email" class="form-control bg-transparent border-0 shadow-none small" placeholder="name@example.com" required value="{{ old('email') }}">
                                         </div>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label for="reg_password" class="form-label small fw-bold text-dark">Password</label>
-                                        <div class="input-group border border-light-subtle rounded-3 bg-white px-2 py-1 align-items-center">
-                                            <span class="text-secondary ps-1"><i class="fas fa-lock"></i></span>
-                                            <input type="password" id="reg_password" class="form-control bg-transparent border-0 shadow-none small" placeholder="Minimum 8 characters" required>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-sm-6">
+                                            <label for="reg_pincode" class="form-label small fw-bold text-dark">PIN Code</label>
+                                            <div class="input-group border border-light-subtle rounded-3 bg-white px-2 py-1 align-items-center">
+                                                <span class="text-secondary ps-1"><i class="fas fa-map-marker-alt"></i></span>
+                                                <input type="text" name="pincode" id="reg_pincode" maxlength="6" class="form-control bg-transparent border-0 shadow-none small" placeholder="500090" required value="{{ old('pincode') }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label for="reg_phone" class="form-label small fw-bold text-dark">Phone Number</label>
+                                            <div class="input-group border border-light-subtle rounded-3 bg-white px-2 py-1 align-items-center">
+                                                <span class="text-secondary ps-1"><i class="fas fa-phone-alt"></i></span>
+                                                <input type="text" name="phone" id="reg_phone" class="form-control bg-transparent border-0 shadow-none small" placeholder="9876543210" required value="{{ old('phone') }}">
+                                            </div>
                                         </div>
                                     </div>
 
                                     <div class="mb-4">
-                                        <label for="reg_password_confirmation" class="form-label small fw-bold text-dark">Confirm Password</label>
+                                        <label for="reg_password" class="form-label small fw-bold text-dark">Password</label>
                                         <div class="input-group border border-light-subtle rounded-3 bg-white px-2 py-1 align-items-center">
-                                            <span class="text-secondary ps-1"><i class="fas fa-shield-alt"></i></span>
-                                            <input type="password" id="reg_password_confirmation" class="form-control bg-transparent border-0 shadow-none small" placeholder="••••••••" required>
+                                            <span class="text-secondary ps-1"><i class="fas fa-lock"></i></span>
+                                            <input type="password" name="password" id="reg_password" class="form-control bg-transparent border-0 shadow-none small" placeholder="Minimum 8 characters" required>
                                         </div>
                                     </div>
 

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 // Standard Authentication UI View Render Frame
 Route::get('/auth', function () {
     return view('auth');
-})->middleware(['web', 'guest']); // Prevents logged-in users from seeing the login screen again
+})->middleware(['web', 'guest'])->name('login'); // Added named parameter link for security layers
 
 // Global Application Core Actions (Throttled for Security & High Performance)
 Route::middleware(['web', 'throttle:60,1'])->group(function () {
@@ -18,19 +18,13 @@ Route::middleware(['web', 'throttle:60,1'])->group(function () {
     Route::get('/products/{id}/details', [HomeController::class, 'getProductDetails'])->whereNumber('id')->name('products.details');
     
     // 2. State-Driven Cart Synchronization Engine
-    Route::get('/cart/view', [HomeController::class, 'viewCart'])->name('cart.view');
-    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add'); // Integrated Cart Addition Endpoint
+    Route::get('/cart/view', [CartController::class, 'viewCart'])->name('cart.view');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add'); 
     Route::post('/cart/remove', [CartController::class, 'removeFromCart'])->name('cart.remove');
 
-    // Checkout Page
-    Route::get('/checkout', function () {
-        return view('checkout');
-    })->name('checkout.view');
-
     // 3. High-Precision Checkout, Invoice Calculation, & Billing Engine
-    Route::get('/checkout/summary', [HomeController::class, 'getCheckoutCalculationSummary'])->name('checkout.summary');
-
     Route::get('/checkout', [CartController::class, 'showCheckoutPage'])->name('checkout.view');
+    Route::get('/checkout/summary', [CartController::class, 'getCheckoutCalculationSummary'])->name('checkout.summary');
     
     // 4. Regional Location Engine Sync Endpoint
     Route::post('/location/sync', [HomeController::class, 'setLocationToken'])->name('location.sync');
