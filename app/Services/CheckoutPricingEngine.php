@@ -36,8 +36,10 @@ class CheckoutPricingEngine
             $subtotal += ($itemPrice * $qty);
         }
 
-        // Apply specialized logistics overrides based on your structural tiers
-        $deliveryCharges = (float) $logisticsMetrics->base_delivery_fee;
+        // FIX: Read safely from the array primitives matrix to bypass incomplete object hazards entirely
+        $deliveryCharges = is_array($logisticsMetrics) 
+            ? (float) $logisticsMetrics['base_delivery_fee'] 
+            : (float) ($logisticsMetrics->base_delivery_fee ?? 0.00);
         
         // Apply installation support charges if checked/selected by user
         $installationCharges = $wantsInstallation ? 500.00 : 0.00;
@@ -56,8 +58,8 @@ class CheckoutPricingEngine
             'installation_charges' => round($installationCharges, 2),
             'discount_deductions'  => round($discountAmount, 2),
             'final_payable_amount' => round($finalPayableAmount, 2),
-            'delivery_hours'       => $logisticsMetrics->delivery_hours,
-            'has_store_pickup'     => $logisticsMetrics->has_store_pickup
+            'delivery_hours'       => is_array($logisticsMetrics) ? $logisticsMetrics['delivery_hours'] : ($logisticsMetrics->delivery_hours ?? 24),
+            'has_store_pickup'     => is_array($logisticsMetrics) ? $logisticsMetrics['has_store_pickup'] : ($logisticsMetrics->has_store_pickup ?? false)
         ];
     }
 }

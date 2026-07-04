@@ -22,20 +22,16 @@ $(document).ready(function () {
     if (eligibilityModalEl) {
         let eligibilityInstance = new bootstrap.Modal(eligibilityModalEl);
 
-        // Rule 5: ONLY trigger the popup if the user is a guest AND hasn't entered a pincode yet this session
         if (!isLoggedIn && !localPincodeSet) {
             eligibilityInstance.show();
 
-            // Rule 3: Catch if the user forces the modal closed without verifying a code
             $(eligibilityModalEl).on('hidden.bs.modal', function () {
                 if (!localStorage.getItem('user_delivery_pincode')) {
-                    // Force system fallback state automatically to default 500090
                     applyGlobalLocationSync('500090');
                 }
             });
         }
 
-        // Intercept form submissions securely
         $('#pincodeCheckForm').on('submit', function (e) {
             e.preventDefault();
             let pincodeInput = $('#deliveryPincodeInput');
@@ -52,9 +48,6 @@ $(document).ready(function () {
         });
     }
 
-    /**
-     * AJAX endpoint sync processing core handler
-     */
     function applyGlobalLocationSync(pincode) {
         let appUrl = $('meta[name="app-url"]').attr('content') || '';
         let cleanAppUrl = appUrl.endsWith('/') ? appUrl.slice(0, -1) : appUrl;
@@ -82,8 +75,11 @@ $(document).ready(function () {
         
         if (!productId || isNaN(productId) || !modalEl) return;
 
+        // Reset inputs and buttons clean to prevent data overlap if the network lags
         $('#modalProductTitle').text('Loading Product Context...');
         $('#modalProductDescription').text('Fetching data securely...');
+        let mainAddToCartBtn = $(modalEl).find('.add-to-cart-btn');
+        mainAddToCartBtn.attr('data-product-id', productId); // Set an explicit attribute tracker
 
         let productModalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
         productModalInstance.show();
@@ -171,8 +167,6 @@ $(document).ready(function () {
                     qtyInput.value = 1;
                     qtyInput.setAttribute('max', data.stock || 20);
                 }
-                
-                $(modalEl).find('.add-to-cart-btn').attr('data-id', data.id);
 
                 let dealerListContainer = document.getElementById('dealerListContainer');
                 if (dealerListContainer) {
@@ -241,7 +235,6 @@ $(document).ready(function () {
         let cleanAppUrl = appUrl.endsWith('/') ? appUrl.slice(0, -1) : appUrl;
         let container = $('#cartDrawerContent');
 
-        // Loading spinner animation initialization
         container.html(`
             <div class="d-flex flex-column align-items-center justify-content-center h-100 py-5 w-100 text-center">
                 <div class="spinner-border text-primary" role="status"></div>
@@ -252,7 +245,7 @@ $(document).ready(function () {
         $.ajax({
             url: cleanAppUrl + '/cart/view',
             method: 'GET',
-            dataType: 'html', // Expects HTML view partials from backend engine
+            dataType: 'html',
             success: function (htmlContent) {
                 container.html(htmlContent);
             },
@@ -268,7 +261,6 @@ $(document).ready(function () {
         });
     });
 
-    // Handle asynchronous item deletions inside the offcanvas drawer layout template
     // -------------------------------------------------------------------------
     // BASKET ITEM ASYNCHRONOUS DELETION SUB-SYSTEM
     // -------------------------------------------------------------------------
@@ -276,14 +268,13 @@ $(document).ready(function () {
         e.preventDefault();
         
         let button = $(this);
-        let cartKey = button.data('id'); // Pulls '1_default' or structural string hash maps
+        let cartKey = button.data('id'); 
         
         if (!cartKey) return;
 
         let appUrl = $('meta[name="app-url"]').attr('content') || '';
         let cleanAppUrl = appUrl.endsWith('/') ? appUrl.slice(0, -1) : appUrl;
 
-        // Provide clean visual feedback by fading the target item row out natively
         let itemRow = button.closest('.d-flex.align-items-center');
         itemRow.css('opacity', '0.5');
         button.prop('disabled', true);
@@ -294,14 +285,10 @@ $(document).ready(function () {
             data: { cart_key: cartKey },
             dataType: 'json',
             success: function (response) {
-                // 1. Update the top right navbar cart counts bubble icon badge matrix
                 $('#global-cart-count').text(response.cart_count);
-                
-                // 2. Retrigger a re-draw on the side panel canvas to compile fresh math tallies
                 $('#cartDrawer').trigger('show.bs.offcanvas');
             },
             error: function () {
-                // Reset styling if something blocks the deletion pipeline rules
                 itemRow.css('opacity', '1');
                 button.prop('disabled', false);
                 alert('Fulfillment sync boundary error. Failed to remove product securely.');
@@ -356,7 +343,6 @@ $(document).ready(function () {
     $(document).on('click', '.js-category-filter', function (e) {
         e.preventDefault();
         
-        // FIXED EXPLICITLY HERE: Strip out the old '.bg-primary text-white' string completely
         $('.js-category-filter').removeClass('active');
         $(this).addClass('active');
 
@@ -405,7 +391,8 @@ $(document).ready(function () {
         e.preventDefault();
         
         let button = $(this);
-        let productId = button.data('id');
+        // FIX: Prioritize explicit attribute evaluation over internal cached data logs
+        let productId = button.attr('data-product-id') || button.data('id');
         let quantity = 1;
         let selectedPackageName = null;
 
@@ -477,7 +464,6 @@ $(document).ready(function () {
                 if (response.success) {
                     let summary = response.summary;
 
-                    // Hydrate dynamic invoice receipt text outputs cleanly
                     $('#invoice-subtotal').text('₹' + summary.subtotal);
                     $('#invoice-gst').text('₹' + summary.gst);
                     $('#invoice-delivery').text(parseFloat(summary.delivery) === 0 ? 'FREE' : '₹' + summary.delivery);
@@ -485,7 +471,6 @@ $(document).ready(function () {
                     $('#invoice-discount').text('- ₹' + summary.discounts);
                     $('#invoice-total').text('₹' + summary.final_payable);
 
-                    // Update regional shipping timeline fields
                     $('#checkout-timeline-indicator').text(summary.delivery_time_string);
                     
                     if (summary.pickup_eligible) {
@@ -507,30 +492,38 @@ $(document).ready(function () {
     }
 
     // -------------------------------------------------------------------------
-    // 7. MODAL QUANTITY INCREMENT & DECREMENT SYSTEM
+    // 7. MODAL QUANTITY INCREMENT & DECREMENT SYSTEM (ISOLATED FIX)
     // -------------------------------------------------------------------------
-    // Decrement handler (Minus Button click)
-    $(document).on('click', '#productModal button:contains("—"), #productModal .btn:has(i.fa-minus), #productModal button:first-of-type', function (e) {
-        e.preventDefault();
-        let qtyInput = $('#modal-qty');
-        if (qtyInput.length > 0) {
-            let currentVal = parseInt(qtyInput.val()) || 1;
-            if (currentVal > 1) {
-                qtyInput.val(currentVal - 1).trigger('change');
+    // Decrement handler - Explicitly targets only buttons that match the exact visual layout indicator string
+    $(document).on('click', '#productModal button', function (e) {
+        let btnText = $(this).text().trim();
+        if (btnText === '—') {
+            e.preventDefault();
+            e.stopPropagation();
+            let qtyInput = $('#modal-qty');
+            if (qtyInput.length > 0) {
+                let currentVal = parseInt(qtyInput.val()) || 1;
+                if (currentVal > 1) {
+                    qtyInput.val(currentVal - 1).trigger('change');
+                }
             }
         }
     });
 
-    // Increment handler (Plus Button click)
-    $(document).on('click', '#productModal button:contains("+"), #productModal .btn:has(i.fa-plus), #productModal button:last-of-type', function (e) {
-        e.preventDefault();
-        let qtyInput = $('#modal-qty');
-        if (qtyInput.length > 0) {
-            let currentVal = parseInt(qtyInput.val()) || 1;
-            let maxLimit = parseInt(qtyInput.attr('max')) || 20;
+    // Increment handler
+    $(document).on('click', '#productModal button', function (e) {
+        let btnText = $(this).text().trim();
+        if (btnText === '+') {
+            e.preventDefault();
+            e.stopPropagation();
+            let qtyInput = $('#modal-qty');
+            if (qtyInput.length > 0) {
+                let currentVal = parseInt(qtyInput.val()) || 1;
+                let maxLimit = parseInt(qtyInput.attr('max')) || 20;
 
-            if (currentVal < maxLimit) {
-                qtyInput.val(currentVal + 1).trigger('change');
+                if (currentVal < maxLimit) {
+                    qtyInput.val(currentVal + 1).trigger('change');
+                }
             }
         }
     });

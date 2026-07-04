@@ -64,7 +64,10 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
         
         // Formulate a clean unique cart matrix item key tracking frame configuration
-        $cartKey = $selectedPackage ? "{$productId}_" . slugify_cart_key($selectedPackage) : "{$productId}_default";
+        // FIX: If the package is missing OR explicitly marked as 'Standard Pack', force the '_default' key tracking suffix
+        $cartKey = ($selectedPackage && $selectedPackage !== 'Standard Pack') 
+            ? "{$productId}_" . slugify_cart_key($selectedPackage) 
+            : "{$productId}_default";
 
         if (isset($cart[$cartKey])) {
             $cart[$cartKey]['quantity'] += $qty;

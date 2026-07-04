@@ -28,19 +28,26 @@ class HomeController extends Controller
         $categories = Category::whereNull('parent_id')->with('subcategories')->get();
         $sortOption = $request->query('sort', 'latest');
 
-        // 1. Resolve active location pin code tracking contexts instantly
+        // 1. Resolve active location pincode context
         $pincode = $this->logistics->resolveCurrentPincode();
         $assignedDealerId = $this->logistics->getAssignedDealerId($pincode);
 
         // 2. Establish baseline active listing filters query track
         $productQuery = Product::where('is_active', true);
 
-        // RULE 1: Filter inventory to ONLY reveal items tied directly to the matched vendor profile
+        // RULE 1: Filter inventory to reveal items tied directly to the matched vendor profile
         if ($assignedDealerId) {
             $productQuery->whereHas('dealers', function ($query) use ($assignedDealerId) {
                 $query->where('dealer_id', $assignedDealerId);
             });
         }
+
+        // FIX: Eager load the specific dealer relationship with its pivot price data right onto the homepage collection
+        $productQuery->with(['dealers' => function ($query) use ($assignedDealerId) {
+            if ($assignedDealerId) {
+                $query->where('dealers.id', $assignedDealerId);
+            }
+        }]);
 
         // 3. Category selector tracking routines
         if ($request->has('category_slug') && $request->input('category_slug') !== 'all') {

@@ -37,7 +37,10 @@ class LogisticsEngine
     /**
      * Matches a pincode to delivery rules with memory caching layered on top.
      */
-    public function getDeliveryMetrics(string $pincode): object
+    /**
+     * Matches a pincode to delivery rules with pure array data structures for secure cache serialization.
+     */
+    public function getDeliveryMetrics(string $pincode): array
     {
         // Use standard caching to prevent slow database hits on every single mouse click
         return Cache::remember("delivery_metrics:{$pincode}", 3600, function () use ($pincode) {
@@ -50,17 +53,17 @@ class LogisticsEngine
                 ->first();
 
             if (!$rule) {
-                // Scenario 4 Fallback: Other pincodes -> 5 hours delivery, no store pickup
-                return (object) [
-                    'delivery_hours' => 5,
-                    'has_store_pickup' => false,
+                // Scenario 4 Fallback: Pure array primitives prevent incomplete object serialization crashes
+                return [
+                    'delivery_hours'    => 5,
+                    'has_store_pickup'  => false,
                     'base_delivery_fee' => 150.00
                 ];
             }
 
-            return (object) [
-                'delivery_hours' => (int) $rule->delivery_hours,
-                'has_store_pickup' => (bool) $rule->has_store_pickup,
+            return [
+                'delivery_hours'    => (int) $rule->delivery_hours,
+                'has_store_pickup'  => (bool) $rule->has_store_pickup,
                 'base_delivery_fee' => (float) $rule->base_delivery_fee
             ];
         });
