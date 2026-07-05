@@ -21,6 +21,7 @@ Route::middleware(['web', 'throttle:60,1'])->group(function () {
     Route::get('/cart/view', [CartController::class, 'viewCart'])->name('cart.view');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add'); 
     Route::post('/cart/remove', [CartController::class, 'removeFromCart'])->name('cart.remove');
+    Route::post('/cart/update-quantity', [App\Http\Controllers\Web\CartController::class, 'updateQuantity'])->name('cart.update-quantity');
 
     // 3. High-Precision Checkout, Invoice Calculation, & Billing Engine
     Route::get('/checkout', [CartController::class, 'showCheckoutPage'])->name('checkout.view');

@@ -437,6 +437,21 @@ $(document).ready(function () {
                     }
                 }
 
+                // -------------------------------------------------------------
+                // NEW: PREMIUM LIVE TOAST TRIGGER SYSTEM
+                // -------------------------------------------------------------
+                let toastEl = document.getElementById('cartToast');
+                if (toastEl) {
+                    // Update message box text string context dynamically if returned
+                    if(response.message) {
+                        $('#cartToastMessage').text(response.message);
+                    }
+                    
+                    // Instantiate and stream the Bootstrap Toast module down to the UI layout
+                    let liveToast = bootstrap.Toast.getInstance(toastEl) || new bootstrap.Toast(toastEl);
+                    liveToast.show();
+                }
+
                 $('#cartDrawer').trigger('show.bs.offcanvas');
                 button.prop('disabled', false).html(originalHtml);
             },
@@ -526,5 +541,48 @@ $(document).ready(function () {
                 }
             }
         }
+    });
+
+    // -------------------------------------------------------------------------
+    // ASYNCHRONOUS INLINE QUANTITY INCREMENT / DECREMENT MODULE
+    // -------------------------------------------------------------------------
+    $(document).on('click', '.change-drawer-qty-btn', function (e) {
+        e.preventDefault();
+        
+        let button = $(this);
+        let cartKey = button.data('id');
+        let action = button.data('action'); // 'increase' or 'decrease'
+        
+        if (!cartKey) return;
+
+        let appUrl = $('meta[name="app-url"]').attr('content') || '';
+        let cleanAppUrl = appUrl.endsWith('/') ? appUrl.slice(0, -1) : appUrl;
+
+        // Visual feedback state: lock siblings during the active network connection handshakes
+        let groupWrapper = button.closest('.input-group');
+        groupWrapper.css('opacity', '0.6');
+        groupWrapper.find('button').prop('disabled', true);
+
+        $.ajax({
+            url: cleanAppUrl + '/cart/update-quantity',
+            method: 'POST',
+            data: { 
+                cart_key: cartKey,
+                action: action
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    $('#global-cart-count').text(response.cart_count);
+                    // Force the Offcanvas listener to pull down refreshed calculations instantly
+                    $('#cartDrawer').trigger('show.bs.offcanvas');
+                }
+            },
+            error: function () {
+                groupWrapper.css('opacity', '1');
+                groupWrapper.find('button').prop('disabled', false);
+                alert('Fulfillment threshold error. Failed to alter item quantity securely.');
+            }
+        });
     });
 });

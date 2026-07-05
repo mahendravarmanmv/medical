@@ -87,7 +87,7 @@ class CartController extends Controller
 
         return response()->json([
             'success'    => true,
-            'message'    => 'Item successfully integrated with session basket arrays.',
+            'message'    => 'Product successfully added to your cart!',
             'cart_count' => count($cart)
         ]);
     }
@@ -194,6 +194,39 @@ class CartController extends Controller
                 'delivery_time_string' => "Delivered within " . $invoiceSummary['delivery_hours'] . " hours",
                 'pickup_eligible'      => $invoiceSummary['has_store_pickup']
             ]
+        ]);
+    }
+    /**
+     * Increments or decrements an item quantity configuration within active session arrays securely.
+     */
+    public function updateQuantity(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'cart_key' => 'required|string',
+            'action'   => 'required|string|in:increase,decrease'
+        ]);
+
+        $cartKey = $validated['cart_key'];
+        $action = $validated['action'];
+        $cart = session()->get('cart', []);
+
+        if (isset($cart[$cartKey])) {
+            if ($action === 'increase') {
+                $cart[$cartKey]['quantity'] += 1;
+            } else {
+                $cart[$cartKey]['quantity'] -= 1;
+                // Defensive strategy: drop the index entirely if value drops under 1 unit boundaries
+                if ($cart[$cartKey]['quantity'] < 1) {
+                    unset($cart[$cartKey]);
+                }
+            }
+            
+            session()->put('cart', $cart);
+        }
+
+        return response()->json([
+            'success'    => true,
+            'cart_count' => count($cart)
         ]);
     }
 }

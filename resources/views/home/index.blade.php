@@ -58,6 +58,7 @@
     </section>
 
     <section class="container mb-4">
+    {{-- <section class="container-fluid px-lg-5 mb-4"> --}}
     <div class="row">
 
         <div class="col-lg-3 mb-4">

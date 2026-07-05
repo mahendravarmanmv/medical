@@ -141,6 +141,20 @@
     @include('components.modals.eligibility-modal')
     @include('cart.partials.cart-drawer')
 
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1085;">
+        <div id="cartToast" class="toast border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+            <div class="toast-header bg-primary text-white p-3 d-flex justify-content-between align-items-center">
+                <span class="fw-bold d-flex align-items-center gap-2">
+                    <i class="bi bi-check-circle-fill fs-5"></i> Basket Updated
+                </span>
+                <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body bg-white p-3 fw-medium text-secondary" id="cartToastMessage">
+                Product successfully added to your shopping basket!
+            </div>
+        </div>
+    </div>
+
     @stack('scripts')
 </body>
 
