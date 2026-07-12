@@ -110,7 +110,7 @@
 
                     <div class="collapse navbar-collapse order-xl-1" id="navbarContent">
                         <ul class="navbar-nav mx-auto mb-2 mb-xl-0 text-center py-3 py-xl-0 gap-2 gap-xl-0">
-                            <li class="nav-item"><a class="nav-link active fw-medium px-3 text-nowrap" href="#">Home</a></li>
+                            <li class="nav-item"><a class="nav-link active fw-medium px-3 text-nowrap" href="{{ url('/') }}">Home</a></li>
                             <li class="nav-item"><a class="nav-link fw-medium px-3 text-nowrap" href="#">CPAP</a></li>
                             <li class="nav-item"><a class="nav-link fw-medium px-3 text-nowrap" href="#">BiPAP</a></li>
                             <li class="nav-item"><a class="nav-link fw-medium px-3 text-nowrap" href="#">Masks</a></li>
@@ -141,7 +141,7 @@
     @include('components.modals.eligibility-modal')
     @include('cart.partials.cart-drawer')
 
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1085;">
+    <div class="toast-container position-fixed top-0 end-0 p-2" style="z-index: 1085;">
         <div id="cartToast" class="toast border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
             <div class="toast-header bg-primary text-white p-3 d-flex justify-content-between align-items-center">
                 <span class="fw-bold d-flex align-items-center gap-2">
