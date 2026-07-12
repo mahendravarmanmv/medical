@@ -64,16 +64,18 @@
                         <!-- Operational Increment and Checkout Action Footers -->
                         <div class="row g-2 align-items-center pt-3 mt-auto">
                             <div class="col-sm-4 col-5">
-                                <div class="d-flex align-items-center justify-content-between border border-dark rounded-pill bg-white px-2 py-1">
-                                    <button class="btn btn-white border-0 p-1 lh-1" type="button" id="btn-qty-minus">
-                                        <i class="fas fa-minus fs-7 text-secondary"></i>
-                                    </button>
-                                    <input type="text" class="form-control text-center bg-transparent border-0 fw-bold text-dark p-0" value="1" id="modal-qty" readonly style="max-width: 35px; box-shadow: none;">
-                                    <button class="btn btn-white border-0 p-1 lh-1" type="button" id="btn-qty-plus">
-                                        <i class="fas fa-plus fs-7 text-secondary"></i>
-                                    </button>
-                                </div>
-                            </div>
+    <div class="d-flex align-items-center justify-content-between border border-dark rounded-pill bg-white px-2 py-1">
+        <button class="btn btn-white border-0 p-1 lh-1 change-modal-qty-btn" type="button" data-action="decrease">
+            <i class="fas fa-minus fs-7 text-secondary"></i>
+        </button>
+        
+        <input type="text" class="form-control text-center bg-transparent border-0 fw-bold text-dark p-0" value="1" id="modal-qty" readonly style="max-width: 35px; box-shadow: none;">
+        
+        <button class="btn btn-white border-0 p-1 lh-1 change-modal-qty-btn" type="button" data-action="increase">
+            <i class="fas fa-plus fs-7 text-secondary"></i>
+        </button>
+    </div>
+</div>
 
                             <div class="col-sm-8 col-7">
                                 <button class="btn btn-primary w-100 rounded-pill py-2.5 fw-bold add-to-cart-btn shadow-sm" id="modalAddToCartBtn" data-id="">

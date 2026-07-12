@@ -73,3 +73,15 @@ html {
     font-weight: 500 !important;
     font-size: 0.95rem;
 }
+/* Precise UI Dimensional Locking Hooks */
+.cart-thumb-box {
+    width: 56px;
+    height: 56px;
+}
+
+.cart-qty-group {
+    width: 90px;
+}
+.z-1050 {
+    z-index: 1050;
+}

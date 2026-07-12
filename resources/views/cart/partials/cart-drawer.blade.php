@@ -1,5 +1,5 @@
 <!-- Ensure these exact class layouts are defined on the parent container wrapper -->
-<div class="offcanvas offcanvas-end border-0 shadow-lg" tabindex="-1" id="cartDrawer" data-bs-scroll="true" aria-labelledby="cartDrawerLabel" style="z-index: 1050;">
+<div class="offcanvas offcanvas-end border-0 shadow-lg z-1050" tabindex="-1" id="cartDrawer" data-bs-scroll="true" aria-labelledby="cartDrawerLabel">
     <div class="offcanvas-header bg-dark text-white p-3">
         <h5 class="offcanvas-title fw-bold d-flex align-items-center gap-2" id="cartDrawerLabel">
             <i class="bi bi-basket3-fill"></i> Your Basket

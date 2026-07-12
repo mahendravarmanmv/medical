@@ -3,7 +3,7 @@
         @foreach($cart as $id => $details)
             <div class="d-flex align-items-center justify-content-between p-3 mb-2 bg-white rounded shadow-sm border-start border-primary border-3">
 
-                <div class="border border-light-subtle rounded bg-white flex-shrink-0 d-flex align-items-center justify-content-center p-1" style="width: 56px; height: 56px;">
+                <div class="border border-light-subtle rounded bg-white flex-shrink-0 d-flex align-items-center justify-content-center p-1 cart-thumb-box">
                     <img src="{{ $details['image'] ?? $details['image_url'] ?? asset('images/default-product.png') }}"
                         class="img-fluid object-fit-contain h-100 w-100"
                         alt="{{ $details['title'] ?? 'Medical Equipment' }}">
@@ -18,7 +18,7 @@
                     @endif
                     
                     <div class="d-flex align-items-center gap-2 mt-2">
-                        <div class="input-group input-group-sm rounded border border-light-subtle" style="width: 90px;">
+                        <div class="input-group input-group-sm rounded border border-light-subtle cart-qty-group">
                             <button class="btn btn-light btn-sm border-0 px-2 change-drawer-qty-btn shadow-none" type="button" data-action="decrease" data-id="{{ $id }}">—</button>
                             <input type="text" class="form-control form-control-sm text-center bg-white border-0 p-0 fw-medium text-dark shadow-none" value="{{ $details['quantity'] ?? 1 }}" readonly>
                             <button class="btn btn-light btn-sm border-0 px-2 change-drawer-qty-btn shadow-none" type="button" data-action="increase" data-id="{{ $id }}">+</button>

@@ -507,58 +507,20 @@ $(document).ready(function () {
     }
 
     // -------------------------------------------------------------------------
-    // 7. MODAL QUANTITY INCREMENT & DECREMENT SYSTEM (ISOLATED FIX)
+    // 7. UNIFIED QUANTITY CHANGE LISTENER (DRAWER & MODAL COMBINED)
     // -------------------------------------------------------------------------
-    // Decrement handler - Explicitly targets only buttons that match the exact visual layout indicator string
-    $(document).on('click', '#productModal button', function (e) {
-        let btnText = $(this).text().trim();
-        if (btnText === '—') {
-            e.preventDefault();
-            e.stopPropagation();
-            let qtyInput = $('#modal-qty');
-            if (qtyInput.length > 0) {
-                let currentVal = parseInt(qtyInput.val()) || 1;
-                if (currentVal > 1) {
-                    qtyInput.val(currentVal - 1).trigger('change');
-                }
-            }
-        }
-    });
-
-    // Increment handler
-    $(document).on('click', '#productModal button', function (e) {
-        let btnText = $(this).text().trim();
-        if (btnText === '+') {
-            e.preventDefault();
-            e.stopPropagation();
-            let qtyInput = $('#modal-qty');
-            if (qtyInput.length > 0) {
-                let currentVal = parseInt(qtyInput.val()) || 1;
-                let maxLimit = parseInt(qtyInput.attr('max')) || 20;
-
-                if (currentVal < maxLimit) {
-                    qtyInput.val(currentVal + 1).trigger('change');
-                }
-            }
-        }
-    });
-
-    // -------------------------------------------------------------------------
-    // ASYNCHRONOUS INLINE QUANTITY INCREMENT / DECREMENT MODULE
-    // -------------------------------------------------------------------------
+    // 1. Drawer Counter Module (Triggers AJAX updates directly)
     $(document).on('click', '.change-drawer-qty-btn', function (e) {
         e.preventDefault();
-        
         let button = $(this);
         let cartKey = button.data('id');
-        let action = button.data('action'); // 'increase' or 'decrease'
+        let action = button.data('action');
         
         if (!cartKey) return;
 
         let appUrl = $('meta[name="app-url"]').attr('content') || '';
         let cleanAppUrl = appUrl.endsWith('/') ? appUrl.slice(0, -1) : appUrl;
 
-        // Visual feedback state: lock siblings during the active network connection handshakes
         let groupWrapper = button.closest('.input-group');
         groupWrapper.css('opacity', '0.6');
         groupWrapper.find('button').prop('disabled', true);
@@ -566,15 +528,11 @@ $(document).ready(function () {
         $.ajax({
             url: cleanAppUrl + '/cart/update-quantity',
             method: 'POST',
-            data: { 
-                cart_key: cartKey,
-                action: action
-            },
+            data: { cart_key: cartKey, action: action },
             dataType: 'json',
             success: function (response) {
                 if (response.success) {
                     $('#global-cart-count').text(response.cart_count);
-                    // Force the Offcanvas listener to pull down refreshed calculations instantly
                     $('#cartDrawer').trigger('show.bs.offcanvas');
                 }
             },
@@ -584,5 +542,30 @@ $(document).ready(function () {
                 alert('Fulfillment threshold error. Failed to alter item quantity securely.');
             }
         });
+    });
+
+    // 2. Modal Counter Module (Updates local UI values prior to 'Add to Cart' click)
+    $(document).on('click', '.change-modal-qty-btn', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        let button = $(this);
+        let action = button.data('action');
+        let qtyInput = $('#modal-qty');
+        
+        if (qtyInput.length > 0) {
+            let currentVal = parseInt(qtyInput.val()) || 1;
+            let maxLimit = parseInt(qtyInput.attr('max')) || 20;
+
+            if (action === 'increase') {
+                if (currentVal < maxLimit) {
+                    qtyInput.val(currentVal + 1).trigger('change');
+                }
+            } else if (action === 'decrease') {
+                if (currentVal > 1) {
+                    qtyInput.val(currentVal - 1).trigger('change');
+                }
+            }
+        }
     });
 });
