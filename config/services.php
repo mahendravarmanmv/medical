@@ -64,5 +64,17 @@ return [
         'WHATSAPP_BUSINESS_PHONE'
     ),
 	],
+	
+	'sleepwell' => [
+
+    'admin_email' => env(
+        'SLEEPWELL_ADMIN_EMAIL'
+    ),
+
+    'admin_whatsapp' => env(
+        'SLEEPWELL_ADMIN_WHATSAPP'
+    ),
+
+	],
 
 ];
