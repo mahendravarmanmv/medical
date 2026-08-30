@@ -13,58 +13,6 @@ $(document).ready(function () {
     });
 
     // -------------------------------------------------------------------------
-    // 2. INITIAL DELIVERY ELIGIBILITY MODAL GATEKEEPER
-    // -------------------------------------------------------------------------
-    let eligibilityModalEl = document.getElementById('eligibilityModal');
-    let isLoggedIn = $('meta[name="auth-check"]').attr('content') === '1';
-    let localPincodeSet = localStorage.getItem('user_delivery_pincode');
-
-    if (eligibilityModalEl) {
-        let eligibilityInstance = new bootstrap.Modal(eligibilityModalEl);
-
-        if (!isLoggedIn && !localPincodeSet) {
-            eligibilityInstance.show();
-
-            $(eligibilityModalEl).on('hidden.bs.modal', function () {
-                if (!localStorage.getItem('user_delivery_pincode')) {
-                    applyGlobalLocationSync('500090');
-                }
-            });
-        }
-
-        $('#pincodeCheckForm').on('submit', function (e) {
-            e.preventDefault();
-            let pincodeInput = $('#deliveryPincodeInput');
-            let pincode = pincodeInput.val() ? pincodeInput.val().trim() : '';
-            let feedback = $('#pincodeFeedback');
-
-            if (pincode.length === 6 && !isNaN(pincode)) {
-                feedback.addClass('d-none');
-                eligibilityInstance.hide();
-                applyGlobalLocationSync(pincode);
-            } else {
-                feedback.text("Please provide a valid 6-digit region pincode.").removeClass('d-none');
-            }
-        });
-    }
-
-    function applyGlobalLocationSync(pincode) {
-        let appUrl = $('meta[name="app-url"]').attr('content') || '';
-        let cleanAppUrl = appUrl.endsWith('/') ? appUrl.slice(0, -1) : appUrl;
-
-        $.ajax({
-            url: cleanAppUrl + '/location/sync',
-            method: 'POST',
-            data: { pincode: pincode },
-            dataType: 'json',
-            success: function(response) {
-                localStorage.setItem('user_delivery_pincode', pincode);
-                console.log("Location successfully tracked:", response.pincode);
-            }
-        });
-    }
-
-    // -------------------------------------------------------------------------
     // 3. HIGH-PERFORMANCE PRODUCT DETAIL MODAL DRAWER & RENDER ENGINE
     // -------------------------------------------------------------------------
     $(document).on('click', '.open-product-modal', function (e) {
@@ -161,6 +109,72 @@ $(document).ready(function () {
                         packageSection.addClass('d-none');
                     }
                 }
+				
+				// -------------------------------------------------------------------------
+				// OPTIONAL WARRANTY SELECTION
+				// -------------------------------------------------------------------------
+				let warrantyContainer = document.getElementById('modalWarrantyContainer');
+
+				if (warrantyContainer) {
+				warrantyContainer.innerHTML = '';
+
+				let warrantySection = $('.js-warranty-section');
+
+				if (data.warranties && data.warranties.length > 0) {
+				warrantySection.removeClass('d-none');
+
+				let warrantyHtml = '';
+
+				data.warranties.forEach((warranty, index) => {
+				let isActive = index === 0;
+
+				warrantyHtml += `
+				<div class="col-6 col-md-4">
+					<div class="border ${isActive ? 'border-primary shadow-sm' : 'border-light-subtle'} rounded-3 p-3 h-100 cursor-pointer warranty-variant-card"
+						 data-warranty-id="${warranty.id}"
+						 data-price="${warranty.price}">
+
+						<div class="d-flex justify-content-between align-items-center mb-2">
+							<span class="fw-semibold small text-dark">
+								${warranty.warranty_years} Year${warranty.warranty_years > 1 ? 's' : ''}
+							</span>
+
+							${isActive ? '<i class="fas fa-check-circle text-primary"></i>' : ''}
+						</div>
+
+						<div class="fw-bold fs-5 ${isActive ? 'text-primary' : 'text-dark'}">
+							₹${parseFloat(warranty.price).toLocaleString('en-IN', {
+								maximumFractionDigits: 0
+							})}
+						</div>
+
+					</div>
+				</div>
+				`;
+				});
+
+				warrantyContainer.innerHTML = warrantyHtml;
+
+				// First warranty becomes the default selected warranty.
+				let firstWarranty = data.warranties[0];
+
+				$('#modalProductPrice').text(
+				'₹' + parseFloat(firstWarranty.price).toLocaleString('en-IN')
+				);
+
+				let originalPriceEl = document.getElementById('modalProductOriginalPrice');
+
+				if (originalPriceEl) {
+				originalPriceEl.textContent =
+				'₹' + Math.round(
+					parseFloat(firstWarranty.price) * 1.35
+				).toLocaleString('en-IN');
+				}
+
+				} else {
+				warrantySection.addClass('d-none');
+				}
+				}
 
                 let qtyInput = document.getElementById('modal-qty');
                 if (qtyInput) {
@@ -336,6 +350,45 @@ $(document).ready(function () {
             }
         }
     });
+	
+	// -------------------------------------------------------------------------
+// DYNAMIC CARD SELECTION ENGINE: CHOOSE WARRANTY INTERACTION
+// -------------------------------------------------------------------------
+$(document).on('click', '.warranty-variant-card', function () {
+
+    $('.warranty-variant-card')
+        .removeClass('border-primary shadow-sm')
+        .addClass('border-light-subtle');
+
+    $('.warranty-variant-card .fa-check-circle').remove();
+
+    $(this)
+        .removeClass('border-light-subtle')
+        .addClass('border-primary shadow-sm');
+
+    $(this)
+        .find('.d-flex')
+        .append('<i class="fas fa-check-circle text-primary"></i>');
+
+    let selectedPrice = parseFloat($(this).data('price'));
+
+    if (!isNaN(selectedPrice)) {
+
+        $('#modalProductPrice').text(
+            '₹' + selectedPrice.toLocaleString('en-IN')
+        );
+
+        let originalPriceEl =
+            document.getElementById('modalProductOriginalPrice');
+
+        if (originalPriceEl) {
+            originalPriceEl.textContent =
+                '₹' + Math.round(
+                    selectedPrice * 1.35
+                ).toLocaleString('en-IN');
+        }
+    }
+});
 
     // -------------------------------------------------------------------------
     // SHOP BY CATEGORY SIDEBAR INTERACTION
@@ -366,14 +419,9 @@ $(document).ready(function () {
                 category_slug: categorySlug,
                 sort: currentSort
             },
-            success: function (htmlGridPartial) {
-                $('#mainProductGridContainer').html(htmlGridPartial);
-                
-                let savedPincode = localStorage.getItem('user_delivery_pincode');
-                if (savedPincode && typeof evaluateExpressDeliveryBadges === 'function') {
-                    evaluateExpressDeliveryBadges(savedPincode);
-                }
-            },
+			success: function (htmlGridPartial) {
+			$('#mainProductGridContainer').html(htmlGridPartial);
+			},
             error: function () {
                 $('#mainProductGridContainer').html(`
                     <div class="col-12 text-center py-5">
@@ -395,17 +443,29 @@ $(document).ready(function () {
         let productId = button.attr('data-product-id') || button.data('id');
         let quantity = 1;
         let selectedPackageName = null;
+		let selectedWarrantyId = null;
 
         let isInsideModal = button.closest('#productModal').length > 0;
 
-        if (isInsideModal) {
-            quantity = parseInt($('#modal-qty').val()) || 1;
-            
-            let activePackageCard = $('#modalPackageContainer .package-variant-card.border-primary');
-            if (activePackageCard.length > 0) {
-                selectedPackageName = activePackageCard.find('.fw-semibold').text().trim();
-            }
-        }
+		if (isInsideModal) {
+		quantity = parseInt($('#modal-qty').val()) || 1;
+
+		let activePackageCard =
+		$('#modalPackageContainer .package-variant-card.border-primary');
+
+		if (activePackageCard.length > 0) {
+		selectedPackageName =
+			activePackageCard.find('.fw-semibold').text().trim();
+		}
+
+		let activeWarrantyCard =
+		$('#modalWarrantyContainer .warranty-variant-card.border-primary');
+
+		if (activeWarrantyCard.length > 0) {
+		selectedWarrantyId =
+			activeWarrantyCard.data('warranty-id');
+		}
+		}
 
         if (!productId || isNaN(productId)) return;
 
@@ -420,11 +480,12 @@ $(document).ready(function () {
         $.ajax({
             url: cleanAppUrl + '/cart/add',
             method: 'POST',
-            data: {
-                product_id: productId,
-                quantity: quantity,
-                package: selectedPackageName
-            },
+			data: {
+			product_id: productId,
+			quantity: quantity,
+			package: selectedPackageName,
+			warranty_id: selectedWarrantyId
+			},
             dataType: 'json',
             success: function (response) {
                 $('#global-cart-count').text(response.cart_count);
@@ -484,15 +545,7 @@ $(document).ready(function () {
                     $('#invoice-delivery').text(parseFloat(summary.delivery) === 0 ? 'FREE' : '₹' + summary.delivery);
                     $('#invoice-installation').text('₹' + summary.installation);
                     $('#invoice-discount').text('- ₹' + summary.discounts);
-                    $('#invoice-total').text('₹' + summary.final_payable);
-
-                    $('#checkout-timeline-indicator').text(summary.delivery_time_string);
-                    
-                    if (summary.pickup_eligible) {
-                        $('#store-pickup-option-box').removeClass('d-none');
-                    } else {
-                        $('#store-pickup-option-box').addClass('d-none');
-                    }
+                    $('#invoice-total').text('₹' + summary.final_payable);                    
                 }
             }
         });
@@ -505,6 +558,164 @@ $(document).ready(function () {
     if ($('#invoice-total').length > 0) {
         refreshCheckoutInvoiceSummary();
     }
+	
+	
+		// -------------------------------------------------------------------------
+		// CHECKOUT - CASH ON DELIVERY ORDER SUBMISSION
+		// -------------------------------------------------------------------------
+		$(document).on('submit', '#checkoutForm', function (e) {
+		e.preventDefault();
+
+		let form = $(this);
+		let button = $('#placeOrderBtn');
+		let errorBox = $('#checkoutError');
+
+		if (button.prop('disabled')) {
+		return;
+		}
+
+		/*
+		* Clear previous error.
+		*/
+		errorBox
+		.addClass('d-none')
+		.text('');
+
+		/*
+		* Browser-level validation.
+		*/
+		if (!form[0].checkValidity()) {
+		form[0].reportValidity();
+		return;
+		}
+
+		/*
+		* Disable button while order is being processed.
+		*/
+		button.prop('disabled', true);
+
+		button.find('.place-order-text').addClass('d-none');
+		button.find('.place-order-loading').removeClass('d-none');
+
+		let appUrl =
+		$('meta[name="app-url"]').attr('content') || '';
+
+		let cleanAppUrl =
+		appUrl.endsWith('/')
+			? appUrl.slice(0, -1)
+			: appUrl;
+
+		/*
+		* Serialize complete checkout form.
+		*/
+		let formData = form.serialize();
+
+		$.ajax({
+		url: cleanAppUrl + '/checkout/place-order',
+
+		method: 'POST',
+
+		data: formData,
+
+		dataType: 'json',
+
+		success: function (response) {
+
+			if (response.success) {
+
+				/*
+				 * Redirect to order success page.
+				 */
+				if (response.redirect) {
+					window.location.href =
+						response.redirect;
+
+					return;
+				}
+
+				/*
+				 * Fallback.
+				 */
+				alert(
+					response.message ||
+					'Your order has been placed successfully.'
+				);
+			}
+		},
+
+		error: function (xhr) {
+
+			let message =
+				'Unable to place your order. Please try again.';
+
+			/*
+			 * Laravel validation response.
+			 */
+			if (
+				xhr.responseJSON &&
+				xhr.responseJSON.errors
+			) {
+
+				let errors =
+					xhr.responseJSON.errors;
+
+				let firstError = null;
+
+				Object.keys(errors).some(function (key) {
+
+					if (
+						errors[key] &&
+						errors[key].length > 0
+					) {
+						firstError =
+							errors[key][0];
+
+						return true;
+					}
+
+					return false;
+				});
+
+				if (firstError) {
+					message = firstError;
+				}
+
+			} else if (
+				xhr.responseJSON &&
+				xhr.responseJSON.message
+			) {
+
+				message =
+					xhr.responseJSON.message;
+			}
+
+			errorBox
+				.removeClass('d-none')
+				.text(message);
+
+			/*
+			 * Scroll user to the error.
+			 */
+			$('html, body').animate({
+				scrollTop:
+					errorBox.offset().top - 100
+			}, 300);
+		},
+
+		complete: function () {
+
+			button.prop('disabled', false);
+
+			button
+				.find('.place-order-text')
+				.removeClass('d-none');
+
+			button
+				.find('.place-order-loading')
+				.addClass('d-none');
+		}
+		});
+		});
 
     // -------------------------------------------------------------------------
     // 7. UNIFIED QUANTITY CHANGE LISTENER (DRAWER & MODAL COMBINED)

@@ -41,7 +41,7 @@
             <h5 class="fw-bold mb-0 text-secondary">Total Amount:</h5>
             <h4 class="fw-bold text-primary mb-0">₹{{ number_format($total ?? 0, 2) }}</h4>
         </div>
-        <a href="{{ route('checkout.view') }}" class="btn btn-dark w-100 py-2.5 rounded-pill fw-bold shadow-sm text-white d-flex align-items-center justify-content-center text-decoration-none gap-1">
+        <a href="{{ route('checkout') }}" class="btn btn-dark w-100 py-2.5 rounded-pill fw-bold shadow-sm text-white d-flex align-items-center justify-content-center text-decoration-none gap-1">
             Proceed To Checkout <i class="bi bi-arrow-right ms-1"></i>
         </a>
     </div>

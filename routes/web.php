@@ -24,11 +24,25 @@ Route::middleware(['web', 'throttle:60,1'])->group(function () {
     Route::post('/cart/update-quantity', [App\Http\Controllers\Web\CartController::class, 'updateQuantity'])->name('cart.update-quantity');
 
     // 3. High-Precision Checkout, Invoice Calculation, & Billing Engine
-    Route::get('/checkout', [CartController::class, 'showCheckoutPage'])->name('checkout.view');
-    Route::get('/checkout/summary', [CartController::class, 'getCheckoutCalculationSummary'])->name('checkout.summary');
-    
-    // 4. Regional Location Engine Sync Endpoint
-    Route::post('/location/sync', [HomeController::class, 'setLocationToken'])->name('location.sync');
+	Route::get(
+	'/checkout',
+	[CartController::class, 'showCheckoutPage']
+	)->middleware('auth')->name('checkout');
+
+	Route::get(
+	'/checkout/summary',
+	[CartController::class, 'getCheckoutCalculationSummary']
+	)->middleware('auth')->name('checkout.summary');
+
+	Route::post(
+	'/checkout/place-order',
+	[CartController::class, 'placeOrder']
+	)->middleware('auth')->name('checkout.place-order');
+	
+	Route::get(
+	'/order/success/{orderNumber}',
+	[CartController::class, 'orderSuccess']
+	)->middleware('auth')->name('order.success');
 
     // 5. Guest Authentication Post Actions
     Route::middleware('guest')->group(function () {

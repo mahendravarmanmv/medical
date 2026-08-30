@@ -59,6 +59,14 @@
                                     </div>
                                 </div>
                             </div>
+							<div class="js-warranty-section d-none border-top border-light-subtle pt-4 mt-4">
+							<h6 class="fw-bold text-dark mb-3">
+							Choose Warranty
+							</h6>
+
+							<div class="row g-2" id="modalWarrantyContainer">
+							</div>
+							</div>
                         </div>
 
                         <!-- Operational Increment and Checkout Action Footers -->

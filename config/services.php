@@ -34,5 +34,35 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+	'whatsapp' => [
+    'enabled' => env('WHATSAPP_ENABLED', false),
+
+    'provider' => env(
+        'WHATSAPP_PROVIDER',
+        'meta'
+    ),
+
+    'base_url' => env(
+        'WHATSAPP_BASE_URL',
+        'https://graph.facebook.com'
+    ),
+
+    'api_version' => env(
+        'WHATSAPP_API_VERSION',
+        'v23.0'
+    ),
+
+    'phone_number_id' => env(
+        'WHATSAPP_PHONE_NUMBER_ID'
+    ),
+
+    'access_token' => env(
+        'WHATSAPP_ACCESS_TOKEN'
+    ),
+
+    'business_phone' => env(
+        'WHATSAPP_BUSINESS_PHONE'
+    ),
+	],
 
 ];

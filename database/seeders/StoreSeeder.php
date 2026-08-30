@@ -47,16 +47,53 @@ class StoreSeeder extends Seeder
         ]);
 
         // Add some subcategories for the left vertical sidebar engine
-        Category::create(['name' => 'Auto CPAP', 'slug' => 'auto-cpap', 'parent_id' => $cpapCategory->id]);
-        Category::create(['name' => 'Travel CPAP', 'slug' => 'travel-cpap', 'parent_id' => $cpapCategory->id]);
-        Category::create(['name' => 'Fixed CPAP', 'slug' => 'fixed-cpap', 'parent_id' => $cpapCategory->id]);
-        
-        Category::create(['name' => 'Standard BiPAP', 'slug' => 'standard-bipap', 'parent_id' => $bipapCategory->id]);
-        Category::create(['name' => 'Auto BiPAP', 'slug' => 'auto-bipap', 'parent_id' => $bipapCategory->id]);
-        
-        Category::create(['name' => 'Full Face Masks', 'slug' => 'full-face-masks', 'parent_id' => $masksCategory->id]);
-        Category::create(['name' => 'Nasal Masks', 'slug' => 'nasal-masks', 'parent_id' => $masksCategory->id]);
-        Category::create(['name' => 'Nasal Pillows', 'slug' => 'nasal-pillows', 'parent_id' => $masksCategory->id]);
+        $autoCpapCategory = Category::create([
+    'name' => 'Auto CPAP',
+    'slug' => 'auto-cpap',
+    'parent_id' => $cpapCategory->id
+]);
+
+$travelCpapCategory = Category::create([
+    'name' => 'Travel CPAP',
+    'slug' => 'travel-cpap',
+    'parent_id' => $cpapCategory->id
+]);
+
+$fixedCpapCategory = Category::create([
+    'name' => 'Fixed CPAP',
+    'slug' => 'fixed-cpap',
+    'parent_id' => $cpapCategory->id
+]);
+
+$standardBipapCategory = Category::create([
+    'name' => 'Standard BiPAP',
+    'slug' => 'standard-bipap',
+    'parent_id' => $bipapCategory->id
+]);
+
+$autoBipapCategory = Category::create([
+    'name' => 'Auto BiPAP',
+    'slug' => 'auto-bipap',
+    'parent_id' => $bipapCategory->id
+]);
+
+$fullFaceMasksCategory = Category::create([
+    'name' => 'Full Face Masks',
+    'slug' => 'full-face-masks',
+    'parent_id' => $masksCategory->id
+]);
+
+$nasalMasksCategory = Category::create([
+    'name' => 'Nasal Masks',
+    'slug' => 'nasal-masks',
+    'parent_id' => $masksCategory->id
+]);
+
+$nasalPillowsCategory = Category::create([
+    'name' => 'Nasal Pillows',
+    'slug' => 'nasal-pillows',
+    'parent_id' => $masksCategory->id
+]);
 
         // ==========================================
         // 5. HYDRATE TARGET MATCHING MACHINE RECORDS
@@ -64,7 +101,7 @@ class StoreSeeder extends Seeder
 
         // Item 1: ResMed AirSense 10 AutoSet CPAP
         Product::create([
-            'category_id' => $cpapCategory->id,
+            'category_id' => $autoCpapCategory->id,
             'badge_text' => 'BEST SELLER',
             'badge_color' => 'bg-success',
             'title' => 'ResMed AirSense 10 AutoSet CPAP',
@@ -85,7 +122,7 @@ class StoreSeeder extends Seeder
 
         // Item 2: ResMed AirCurve 10 VAuto BiPAP
         Product::create([
-            'category_id' => $bipapCategory->id,
+            'category_id' => $autoBipapCategory->id,
             'badge_text' => 'POPULAR',
             'badge_color' => 'bg-primary',
             'title' => 'ResMed AirCurve 10 VAuto BiPAP',
@@ -106,7 +143,7 @@ class StoreSeeder extends Seeder
 
         // Item 3: ResMed AirMini Travel CPAP
         Product::create([
-            'category_id' => $cpapCategory->id,
+            'category_id' => $travelCpapCategory->id,
             'badge_text' => 'NEW',
             'badge_color' => 'bg-info text-dark',
             'title' => 'ResMed AirMini Travel CPAP',

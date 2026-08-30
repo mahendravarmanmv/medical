@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="auth-check" content="{{ auth()->check() ? '1' : '0' }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'SleepWell | Home' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -138,7 +137,6 @@
     </footer>
 
     @include('components.modals.product-details-modal')
-    @include('components.modals.eligibility-modal')
     @include('cart.partials.cart-drawer')
 
     <div class="toast-container position-fixed top-0 end-0 p-2" style="z-index: 1085;">

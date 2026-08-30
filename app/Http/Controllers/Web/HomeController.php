@@ -5,57 +5,41 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
-use App\Services\LogisticsEngine;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\JsonResponse;
 
 class HomeController extends Controller
 {
-    // 1. Declare the logistics property explicitly
-    protected $logistics;
-
-    /**
-     * 2. Inject the LogisticsEngine into the Constructor
-     */
-    public function __construct(LogisticsEngine $logistics)
-    {
-        $this->logistics = $logistics;
-    }
 
     public function index(Request $request)
     {
         $categories = Category::whereNull('parent_id')->with('subcategories')->get();
         $sortOption = $request->query('sort', 'latest');
 
-        // 1. Resolve active location pincode context
-        $pincode = $this->logistics->resolveCurrentPincode();
-        $assignedDealerId = $this->logistics->getAssignedDealerId($pincode);
-
         // 2. Establish baseline active listing filters query track
         $productQuery = Product::where('is_active', true);
 
-        // RULE 1: Filter inventory to reveal items tied directly to the matched vendor profile
-        if ($assignedDealerId) {
-            $productQuery->whereHas('dealers', function ($query) use ($assignedDealerId) {
-                $query->where('dealer_id', $assignedDealerId);
-            });
-        }
-
-        // FIX: Eager load the specific dealer relationship with its pivot price data right onto the homepage collection
-        $productQuery->with(['dealers' => function ($query) use ($assignedDealerId) {
-            if ($assignedDealerId) {
-                $query->where('dealers.id', $assignedDealerId);
-            }
-        }]);
-
         // 3. Category selector tracking routines
-        if ($request->has('category_slug') && $request->input('category_slug') !== 'all') {
-            $slug = $request->input('category_slug');
-            $productQuery->whereHas('category', function ($query) use ($slug) {
-                $query->where('slug', $slug);
-            });
-        }
+		if ($request->filled('category_slug') && $request->input('category_slug') !== 'all') {
+		$slug = $request->input('category_slug');
+
+		$category = Category::where('slug', $slug)->first();
+
+		if ($category) {
+		$categoryIds = [$category->id];
+
+		// If this is a parent category, include all direct subcategories.
+		if (is_null($category->parent_id)) {
+			$categoryIds = array_merge(
+				$categoryIds,
+				$category->subcategories()->pluck('id')->toArray()
+			);
+		}
+
+		$productQuery->whereIn('category_id', $categoryIds);
+		}
+		}
 
         // Sort mappings
         $productQuery = match ($sortOption) {
@@ -76,7 +60,7 @@ class HomeController extends Controller
     public function getProductDetails(int $id): \Illuminate\Http\JsonResponse
     {
         // Eager load galleryImages, packages, AND the intermediate dealer pivot structures
-        $product = Product::with(['galleryImages', 'packages', 'dealers'])
+        $product = Product::with(['galleryImages', 'packages', 'warranties', 'dealers'])
             ->where('is_active', true)
             ->findOrFail($id);
 
@@ -94,6 +78,13 @@ class HomeController extends Controller
                     'emi'          => $pkg->emi_starting_price
                 ];
             }),
+			'warranties' => $product->warranties->map(function ($warranty) {
+			return [
+			'id' => $warranty->id,
+			'warranty_years' => $warranty->warranty_years,
+			'price' => $warranty->price,
+			];
+			}),
             'gallery'     => $product->galleryImages->map(function ($img) {
                 return asset($img->image_url);
             }),
@@ -105,20 +96,6 @@ class HomeController extends Controller
                     'price'       => $dealer->pivot->price // Pulls the specific price from pivot table
                 ];
             })
-        ]);
-    }
-
-    public function setLocationToken(Request $request): \Illuminate\Http\JsonResponse
-    {
-        $validated = $request->validate([
-            'pincode' => 'required|string|size:6'
-        ]);
-
-        session()->put('user_delivery_pincode', $validated['pincode']);
-
-        return response()->json([
-            'success' => true,
-            'pincode' => $validated['pincode']
         ]);
     }
 }

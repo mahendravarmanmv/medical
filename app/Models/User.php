@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
@@ -18,8 +19,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password',
-        'pincode',   // FIX: Allows mass assignment from form inputs
+        'password',       
         'phone',     // FIX: Allows mass assignment from form inputs
     ];
 
@@ -45,4 +45,11 @@ class User extends Authenticatable
             'password'          => 'hashed',
         ];
     }
+		/**
+	 * Orders placed by this customer.
+	 */
+	public function orders(): HasMany
+	{
+		return $this->hasMany(Order::class);
+	}
 }

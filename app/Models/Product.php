@@ -45,6 +45,12 @@ class Product extends Model
     {
         return $this->hasMany(ProductPackage::class, 'product_id');
     }
+	
+	public function warranties(): HasMany
+	{
+	return $this->hasMany(ProductWarranty::class, 'product_id')
+		->orderBy('warranty_years');
+	}
 
     /**
      * Secondary thumbnail images for the product picture gallery tray.

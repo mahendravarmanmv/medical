@@ -99,15 +99,9 @@
                                         </div>
                                     </div>
 
-                                    <div class="row g-2 mb-3">
-                                        <div class="col-sm-6">
-                                            <label for="reg_pincode" class="form-label small fw-bold text-dark">PIN Code</label>
-                                            <div class="input-group border border-light-subtle rounded-3 bg-white px-2 py-1 align-items-center">
-                                                <span class="text-secondary ps-1"><i class="fas fa-map-marker-alt"></i></span>
-                                                <input type="text" name="pincode" id="reg_pincode" maxlength="6" class="form-control bg-transparent border-0 shadow-none small" placeholder="500090" required value="{{ old('pincode') }}">
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-6">
+                                    <div class="mb-3">
+                                       
+                                        <div>
                                             <label for="reg_phone" class="form-label small fw-bold text-dark">Phone Number</label>
                                             <div class="input-group border border-light-subtle rounded-3 bg-white px-2 py-1 align-items-center">
                                                 <span class="text-secondary ps-1"><i class="fas fa-phone-alt"></i></span>
