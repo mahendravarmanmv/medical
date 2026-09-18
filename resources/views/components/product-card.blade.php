@@ -17,7 +17,7 @@
                 data-price="{{ $product->price }}"
                 data-description="{{ $product->description ?? 'No direct product summary context supplied.' }}"
                 data-image="{{ $product->image_url }}"
-                data-stock="{{ $product->stock ?? 20 }}"
+                data-stock="{{ $product->stock_quantity }}"
                 data-dealers="{{ json_encode($product->dealers ?? []) }}">
                 <img src="{{ $product->image_url }}"
                     class="img-fluid object-fit-contain w-100 h-100 p-2"
@@ -36,7 +36,7 @@
                     data-price="{{ $product->price }}"
                     data-description="{{ $product->description ?? 'No direct product summary context supplied.' }}"
                     data-image="{{ $product->image_url }}"
-                    data-stock="{{ $product->stock ?? 20 }}"
+                    data-stock="{{ $product->stock_quantity }}"
                     data-dealers="{{ json_encode($product->dealers ?? []) }}">
                     {{ $product->title }}
                 </a>
@@ -103,10 +103,26 @@
 
         <div class="card-footer bg-white border-0 p-3 pt-0 mt-auto">
             <div class="d-flex flex-column gap-2">
-                <button class="btn btn-primary w-100 add-to-cart-btn fw-semibold rounded-1 py-2 d-flex align-items-center justify-content-center gap-2 text-white border-0"
-                    data-id="{{ $product->id }}">
-                    <i class="bi bi-cart3 fs-6"></i> Add to Cart
-                </button>
+			@if($product->stock_quantity === null || $product->stock_quantity > 0)
+
+			<button
+			class="btn btn-primary w-100 add-to-cart-btn fw-semibold rounded-1 py-2 d-flex align-items-center justify-content-center gap-2 text-white border-0"
+			data-id="{{ $product->id }}"
+			>
+			<i class="bi bi-cart3 fs-6"></i> Add to Cart
+			</button>
+
+			@else
+
+			<button
+			type="button"
+			class="btn btn-secondary w-100 fw-semibold rounded-1 py-2 d-flex align-items-center justify-content-center gap-2"
+			disabled
+			>
+			<i class="bi bi-x-circle fs-6"></i> Out of Stock
+			</button>
+
+			@endif
 
                 <button class="btn btn-danger text-white border border-light-subtle w-100 fw-semibold rounded-1 py-2 small">
                     Request Demo

@@ -181,6 +181,11 @@ class OrderService
 
                     'line_total' => $lineTotal,
                 ]);
+				
+				$product->decrement(
+				'stock_quantity',
+				$quantity
+				);
             }
 
             /*

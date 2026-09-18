@@ -518,41 +518,68 @@ public function placeOrder(Request $request): JsonResponse
     }
 }
 
-    /**
-     * Increase/decrease cart quantity.
-     */
-    public function updateQuantity(
-        Request $request
-    ): JsonResponse {
-        $validated = $request->validate([
-            'cart_key' => 'required|string',
-            'action' => 'required|string|in:increase,decrease',
-        ]);
+	/**
+	* Increase/decrease cart quantity.
+	*/
+	public function updateQuantity(
+	Request $request
+	): JsonResponse {
+	$validated = $request->validate([
+		'cart_key' => 'required|string',
+		'action' => 'required|string|in:increase,decrease',
+	]);
 
-        $cartKey = $validated['cart_key'];
-        $action = $validated['action'];
+	$cartKey = $validated['cart_key'];
+	$action = $validated['action'];
 
-        $cart = session()->get('cart', []);
+	$cart = session()->get('cart', []);
 
-        if (isset($cart[$cartKey])) {
-            if ($action === 'increase') {
-                $cart[$cartKey]['quantity'] += 1;
-            } else {
-                $cart[$cartKey]['quantity'] -= 1;
+	if (isset($cart[$cartKey])) {
 
-                if ($cart[$cartKey]['quantity'] < 1) {
-                    unset($cart[$cartKey]);
-                }
-            }
+		if ($action === 'increase') {
 
-            session()->put('cart', $cart);
-        }
+			$product = Product::find($cart[$cartKey]['product_id']);
 
-        return response()->json([
-            'success'    => true,
-            'cart_count' => count($cart),
-        ]);
-    }
+			if (!$product || !$product->is_active) {
+				return response()->json([
+					'success' => false,
+					'message' => 'This product is no longer available.',
+				], 422);
+			}
+
+			$currentQuantity = (int) $cart[$cartKey]['quantity'];
+			$newQuantity = $currentQuantity + 1;
+
+			if (
+				$product->stock_quantity !== null &&
+				$newQuantity > (int) $product->stock_quantity
+			) {
+				return response()->json([
+					'success' => false,
+					'message' =>
+						"Only {$product->stock_quantity} unit(s) of {$product->title} are available.",
+				], 422);
+			}
+
+			$cart[$cartKey]['quantity'] = $newQuantity;
+
+		} else {
+
+			$cart[$cartKey]['quantity'] -= 1;
+
+			if ($cart[$cartKey]['quantity'] < 1) {
+				unset($cart[$cartKey]);
+			}
+		}
+
+		session()->put('cart', $cart);
+	}
+
+	return response()->json([
+		'success'    => true,
+		'cart_count' => count($cart),
+	]);
+	}
 	
 	/**
 	* Display the successful order confirmation page.
