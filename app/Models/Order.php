@@ -9,28 +9,30 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'order_number',
-        'status',
-        'subtotal',
-        'gst_amount',
-        'delivery_charge',
-		'installation_charges',
-        'discount_amount',
-        'total_amount',
-        'payment_method',
-        'payment_status',
-    ];
+	protected $fillable = [
+	'user_id',
+	'order_number',
+	'status',
+	'subtotal',
+	'gst_amount',
+	'gst_rate',
+	'delivery_charge',
+	'installation_charges',
+	'discount_amount',
+	'total_amount',
+	'payment_method',
+	'payment_status',
+	];
 
-    protected $casts = [
-        'subtotal' => 'decimal:2',
-        'gst_amount' => 'decimal:2',
-        'delivery_charge' => 'decimal:2',
-		'installation_charges' => 'decimal:2',
-        'discount_amount' => 'decimal:2',
-        'total_amount' => 'decimal:2',
-    ];
+	protected $casts = [
+	'subtotal' => 'decimal:2',
+	'gst_amount' => 'decimal:2',
+	'gst_rate' => 'decimal:2',
+	'delivery_charge' => 'decimal:2',
+	'installation_charges' => 'decimal:2',
+	'discount_amount' => 'decimal:2',
+	'total_amount' => 'decimal:2',
+	];
 
     /**
      * Customer who placed the order.

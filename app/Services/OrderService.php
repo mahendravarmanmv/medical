@@ -104,11 +104,13 @@ class OrderService
 
                 'status' => 'pending',
 
-                'subtotal' => $pricing['unit_price_subtotal'],
+				'subtotal' => $pricing['unit_price_subtotal'],
 
-                'gst_amount' => $pricing['gst_tax_amount'],
+				'gst_amount' => $pricing['gst_tax_amount'],
 
-                'delivery_charge' => $pricing['delivery_charges'],
+				'gst_rate' => $pricing['tax_rate'],
+
+				'delivery_charge' => $pricing['delivery_charges'],
 
                 'installation_charges' =>
                     $pricing['installation_charges'],

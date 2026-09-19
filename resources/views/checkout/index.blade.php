@@ -366,20 +366,24 @@
                     </div>
 
 
-                    <div class="d-flex justify-content-between mb-3">
+					<div
+					class="d-flex justify-content-between mb-3 {{ $taxEnabled ? '' : 'd-none' }}"
+					id="invoice-tax-row"
+					>
 
-                        <span class="text-muted">
-                            GST / Healthcare Tax (18%)
-                        </span>
+					<span class="text-muted" id="invoice-tax-label">
+					{{ $taxName }}
+					({{ rtrim(rtrim(number_format($taxRate, 2, '.', ''), '0'), '.') }}%)
+					</span>
 
-                        <span
-                            class="fw-bold text-dark"
-                            id="invoice-gst"
-                        >
-                            ₹{{ number_format($gst, 2) }}
-                        </span>
+					<span
+					class="fw-bold text-dark"
+					id="invoice-gst"
+					>
+					₹{{ number_format($gst, 2) }}
+					</span>
 
-                    </div>
+					</div>
 
 
                     <div class="d-flex justify-content-between mb-3">

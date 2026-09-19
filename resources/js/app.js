@@ -541,7 +541,22 @@ $(document).on('click', '.warranty-variant-card', function () {
                     let summary = response.summary;
 
                     $('#invoice-subtotal').text('₹' + summary.subtotal);
-                    $('#invoice-gst').text('₹' + summary.gst);
+					if (summary.tax_enabled) {
+
+					$('#invoice-tax-label').text(
+					summary.tax_name + ' (' + parseFloat(summary.tax_rate) + '%)'
+					);
+
+					$('#invoice-gst').text('₹' + summary.gst);
+
+					$('#invoice-tax-row').removeClass('d-none');
+
+					} else {
+
+					$('#invoice-tax-row').addClass('d-none');
+
+					$('#invoice-gst').text('₹0.00');
+					}
                     $('#invoice-delivery').text(parseFloat(summary.delivery) === 0 ? 'FREE' : '₹' + summary.delivery);
                     $('#invoice-installation').text('₹' + summary.installation);
                     $('#invoice-discount').text('- ₹' + summary.discounts);

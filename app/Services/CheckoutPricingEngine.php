@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Models\SystemSetting;
 
 class CheckoutPricingEngine
 {
@@ -13,9 +14,24 @@ class CheckoutPricingEngine
         array $cartItems,
         bool $wantsInstallation = false
     ): array {
-        $subtotal = 0.00;
-        $discountAmount = 0.00;
-        $standardGstRate = 0.18;
+		$subtotal = 0.00;
+		$discountAmount = 0.00;
+
+		$taxEnabled = SystemSetting::get(
+		'tax',
+		'enabled',
+		true
+		);
+
+		$taxRate = SystemSetting::get(
+		'tax',
+		'rate',
+		18.00
+		);
+
+		$standardGstRate = $taxEnabled
+		? ((float) $taxRate / 100)
+		: 0.00;
 
         foreach ($cartItems as $item) {
             if (!is_array($item)) {
@@ -66,6 +82,16 @@ class CheckoutPricingEngine
                 $gstTaxAmount,
                 2
             ),
+			
+			'tax_name' => SystemSetting::get(
+			'tax',
+			'name',
+			'GST / Healthcare Tax'
+			),
+
+			'tax_rate' => (float) $taxRate,
+			
+			'tax_enabled' => (bool) $taxEnabled,
 
             'delivery_charges' => round(
                 $deliveryCharges,

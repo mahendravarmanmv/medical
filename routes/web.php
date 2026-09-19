@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\CartController;
+use App\Http\Controllers\Web\OrderController;
 use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -51,7 +52,11 @@ Route::middleware(['web', 'throttle:60,1'])->group(function () {
     });
 
     // 6. Authenticated Only Security Actions
-    Route::middleware('auth')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::middleware('auth')->group(function () {        
+		
+		Route::get('/orders',[OrderController::class, 'index'])->name('orders.index');
+		Route::get('/orders/{orderNumber}',[OrderController::class, 'show'])->name('orders.show');
+		Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
     });
 });

@@ -273,46 +273,50 @@ class CartController extends Controller
     /**
      * Render checkout.
      */
-    public function showCheckoutPage()
-    {
-        $cart = session()->get('cart', []);
+	public function showCheckoutPage()
+	{
+	$cart = session()->get('cart', []);
 
-        if (empty($cart)) {
-            return redirect()
-                ->route('home')
-                ->with(
-                    'warning',
-                    'Your basket is currently empty.'
-                );
-        }
+	if (empty($cart)) {
+		return redirect()
+			->route('home')
+			->with(
+				'warning',
+				'Your basket is currently empty.'
+			);
+	}
 
-        $subtotal = 0;
+	$invoiceSummary = $this->pricingEngine
+		->calculateInvoiceSummary(
+			$cart,
+			false
+		);
 
-        foreach ($cart as $item) {
-            if (
-                is_array($item) &&
-                isset($item['price'], $item['quantity'])
-            ) {
-                $subtotal +=
-                    (float) $item['price'] *
-                    (int) $item['quantity'];
-            }
-        }
+	return view(
+		'checkout.index',
+		[
+			'cart' => $cart,
 
-        $gst = $subtotal * 0.18;
+			'subtotal' =>
+				$invoiceSummary['unit_price_subtotal'],
 
-        $finalPayable = $subtotal + $gst;
+			'gst' =>
+				$invoiceSummary['gst_tax_amount'],
 
-        return view(
-            'checkout.index',
-            compact(
-                'cart',
-                'subtotal',
-                'gst',
-                'finalPayable'
-            )
-        );
-    }
+			'finalPayable' =>
+				$invoiceSummary['final_payable_amount'],
+
+			'taxName' =>
+				$invoiceSummary['tax_name'],
+
+			'taxRate' =>
+				$invoiceSummary['tax_rate'],
+				
+			'taxEnabled' =>
+			    $invoiceSummary['tax_enabled'],
+		]
+	);
+	}
 
     /**
      * Return checkout calculation summary.
@@ -346,6 +350,12 @@ class CartController extends Controller
                     $invoiceSummary['gst_tax_amount'],
                     2
                 ),
+				
+				'tax_name' => $invoiceSummary['tax_name'],
+
+				'tax_rate' => $invoiceSummary['tax_rate'],
+				
+				'tax_enabled' => $invoiceSummary['tax_enabled'],
 
                 'delivery' => number_format(
                     $invoiceSummary['delivery_charges'],
