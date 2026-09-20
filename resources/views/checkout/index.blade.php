@@ -1,4 +1,4 @@
-<x-layout :title="'SleepWell | Secure Checkout'">
+<x-layout :title="'SleepQ | Secure Checkout'">
 
 <div class="container py-5">
 
@@ -190,17 +190,22 @@
                                 Pincode
                             </label>
 
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="checkoutPincode"
-                                name="pincode"
-                                placeholder="Enter pincode"
-                                inputmode="numeric"
-                                autocomplete="postal-code"
-                                maxlength="10"
-                                required
-                            >
+						<input
+						type="text"
+						class="form-control"
+						id="checkoutPincode"
+						name="pincode"
+						value="{{ old('pincode', session('selected_pincode', '')) }}"
+						placeholder="Enter pincode"
+						inputmode="numeric"
+						autocomplete="postal-code"
+						maxlength="6"
+						pattern="[0-9]{6}"
+						required
+						>
+						<small class="text-muted">
+						Delivery pincode must match your selected shopping location.
+						</small>
 
                         </div>
 

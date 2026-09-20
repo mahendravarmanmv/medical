@@ -12,38 +12,55 @@
 
     <!-- BANNER ITEM 1 -->
     <div class="carousel-item active position-relative w-100">
-        <!-- 🖥️ Desktop View: Displays full banner from the top downwards on MD screens and larger -->
-        <img src="{{ asset('images/banners/banner1.jpeg') }}" class="w-100 h-auto d-none d-md-block" alt="SleepWell Desktop Banner 1">
-        
-        <!-- 📱 Mobile View: Displays mobile-optimized version on small screens -->
-        <img src="{{ asset('images/banners/banner1.jpeg') }}" class="w-100 h-auto d-block d-md-none" alt="SleepWell Mobile Banner 1">
-        
-        <!-- Dynamic Interactive Overlay Container (Kept clean as requested) -->
+
+        <!-- Desktop View -->
+        <img src="{{ asset('images/banners/banner1.jpeg') }}"
+     class="w-100 d-none d-md-block desktop-banner"
+     alt="SleepQ Desktop Banner 1">
+
+        <!-- Mobile View -->
+        <img src="{{ asset('images/banners/banner2.jpeg') }}"
+             class="w-100 h-auto d-block d-md-none"
+             alt="SleepQ Mobile Banner 1">
+
+        <!-- Dynamic Interactive Overlay -->
         <div class="position-absolute bottom-0 start-0 w-100 p-4 z-2">
             <div class="container px-0 text-start">
                 <div class="d-flex gap-3 mt-4">
-                    {{-- <a href="#" class="btn btn-dark btn-lg rounded-pill px-5 fs-6 fw-bold shadow-sm">Shop Now</a> --}}
+                    {{-- <a href="#" class="btn btn-dark btn-lg rounded-pill px-5 fs-6 fw-bold shadow-sm">
+                        Shop Now
+                    </a> --}}
                 </div>
             </div>
         </div>
+
     </div>
+
 
     <!-- BANNER ITEM 2 -->
     <div class="carousel-item position-relative w-100">
-        <!-- 🖥️ Desktop View -->
-        <img src="{{ asset('images/banners/banner1.jpeg') }}" height="200" class="w-100 h-auto d-none d-md-block" alt="SleepWell Desktop Banner 2">
-        
-        <!-- 📱 Mobile View -->
-        <img src="{{ asset('images/banners/banner1.jpeg') }}" class="w-100 h-auto d-block d-md-none" alt="SleepWell Mobile Banner 2">
-        
+
+        <!-- Desktop View -->
+        <img src="{{ asset('images/banners/banner3.png') }}"
+     class="w-100 d-none d-md-block desktop-banner"
+     alt="SleepQ Desktop Banner 1">
+
+        <!-- Mobile View -->
+        <img src="{{ asset('images/banners/banner1.jpeg') }}"
+             class="w-100 h-auto d-block d-md-none"
+             alt="SleepQ Mobile Banner 2">
+
         <div class="position-absolute bottom-0 start-0 w-100 p-4 z-2">
             <div class="container px-0 text-start">
                 <div class="d-flex gap-3 mt-4">
-                    {{-- <a href="#" class="btn btn-dark btn-lg rounded-pill px-5 fs-6 fw-bold shadow-sm">Explore Masks</a> --}}
+                    {{-- <a href="#" class="btn btn-dark btn-lg rounded-pill px-5 fs-6 fw-bold shadow-sm">
+                        Explore Masks
+                    </a> --}}
                 </div>
             </div>
         </div>
-    </div>    
+
+    </div>
 
 </div>
 
@@ -408,7 +425,7 @@
 
             <div class="d-flex flex-wrap align-items-center gap-4">
 
-                <div class="d-flex align-items-center gap-2">
+			{{-- <div class="d-flex align-items-center gap-2">
 
                     <div class="bg-white bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
                          style="width: 44px; height: 44px;">
@@ -422,7 +439,7 @@
                         </div>
                     </div>
 
-                </div>
+			</div> --}}
 
                 <div class="d-flex align-items-center gap-2">
 
@@ -450,7 +467,7 @@
                     <div>
                         <div class="small text-white-50">Email Us</div>
                         <div class="fw-semibold small text-nowrap">
-                            support@sleepwell.com
+                            support@sleepq.in
                         </div>
                     </div>
 
@@ -463,7 +480,7 @@
         {{-- Right Section --}}
         <div class="col d-flex justify-content-lg-end">
 
-            <div class="bg-white rounded-3 p-3 p-lg-4 w-100">
+		{{-- <div class="bg-white rounded-3 p-3 p-lg-4 w-100">
 
                 <h4 class="fw-bold text-primary mb-3">
                     Book an Appointment
@@ -506,7 +523,7 @@
                     </div>
                 </form>
 
-            </div>
+		</div> --}}
 
         </div>
 
@@ -536,13 +553,13 @@
             </div>
         </div>
 
-        <div class="col">
+        {{-- <div class="col">
             <div class="d-flex align-items-start gap-2 h-100" style="min-height: 56px;">
 
                 <i class="bi bi-arrow-repeat text-primary fs-4 flex-shrink-0"></i>
 
                 <div>
-                    <div class="fw-semibold small text-dark">
+                    {<div class="fw-semibold small text-dark">
                         7 Days Easy
                     </div>
 
@@ -552,7 +569,7 @@
                 </div>
 
             </div>
-        </div>
+		</div> --}}
 
         <div class="col">
             <div class="d-flex align-items-start gap-2 h-100" style="min-height: 56px;">

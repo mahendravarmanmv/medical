@@ -17,8 +17,19 @@ class HomeController extends Controller
         $categories = Category::whereNull('parent_id')->with('subcategories')->get();
         $sortOption = $request->query('sort', 'latest');
 
-        // 2. Establish baseline active listing filters query track
-        $productQuery = Product::where('is_active', true);
+		// 2. Establish baseline active listing filters query track
+		$productQuery = Product::where('is_active', true);
+
+		$selectedPincodeId = session('selected_pincode_id');
+
+		if ($selectedPincodeId) {
+		$productQuery->with([
+		'pincodes' => function ($query) use ($selectedPincodeId) {
+			$query->where('pincodes.id', $selectedPincodeId)
+				  ->where('pincodes.is_active', true);
+		}
+		]);
+		}
 
         // 3. Category selector tracking routines
 		if ($request->filled('category_slug') && $request->input('category_slug') !== 'all') {
@@ -57,45 +68,64 @@ class HomeController extends Controller
         return view('home.index', compact('categories', 'products', 'sortOption'));
     }
 
-    public function getProductDetails(int $id): \Illuminate\Http\JsonResponse
-    {
-        // Eager load galleryImages, packages, AND the intermediate dealer pivot structures
-        $product = Product::with(['galleryImages', 'packages', 'warranties', 'dealers'])
-            ->where('is_active', true)
-            ->findOrFail($id);
+    public function getProductDetails(int $id): JsonResponse
+{
+    $selectedPincodeId = session('selected_pincode_id');
 
-        return response()->json([
-            'id'          => $product->id,
-            'title'       => $product->title,
-            'description' => $product->description ?? 'No direct product summary context supplied.',
-            'price'       => $product->price,
-            'image_url'   => asset($product->image_url),
-            'stock'       => $product->stock_quantity ?? 20,
-            'packages'    => $product->packages->map(function ($pkg) {
-                return [
-                    'package_name' => $pkg->package_name,
-                    'price'        => $pkg->price,
-                    'emi'          => $pkg->emi_starting_price
-                ];
-            }),
-			'warranties' => $product->warranties->map(function ($warranty) {
-			return [
-			'id' => $warranty->id,
-			'warranty_years' => $warranty->warranty_years,
-			'price' => $warranty->price,
-			];
-			}),
-            'gallery'     => $product->galleryImages->map(function ($img) {
-                return asset($img->image_url);
-            }),
+    $product = Product::with([
+        'galleryImages',
+        'packages',
+        'warranties',
+        'dealers',
+    ])
+    ->where('is_active', true)
+    ->findOrFail($id);
 
-            // FIX: Replaces the placeholder array with the real pivot collection
-            'dealers'     => $product->dealers->map(function ($dealer) {
-                return [
-                    'dealer_name' => $dealer->dealer_name,
-                    'price'       => $dealer->pivot->price // Pulls the specific price from pivot table
-                ];
-            })
-        ]);
+    $isDeliverable = false;
+
+    if ($selectedPincodeId) {
+        $isDeliverable = $product->pincodes()
+            ->where('pincodes.id', $selectedPincodeId)
+            ->where('pincodes.is_active', true)
+            ->exists();
     }
+
+    return response()->json([
+        'id'          => $product->id,
+        'title'       => $product->title,
+        'description' => $product->description ?? '',
+        'price'       => $product->price,
+        'image_url'   => asset($product->image_url),
+        'stock'       => $product->stock_quantity ?? 20,
+
+        'is_deliverable' => $isDeliverable,
+
+        'packages' => $product->packages->map(function ($pkg) {
+            return [
+                'package_name' => $pkg->package_name,
+                'price' => $pkg->price,
+                'emi' => $pkg->emi_starting_price,
+            ];
+        }),
+
+        'warranties' => $product->warranties->map(function ($warranty) {
+            return [
+                'id' => $warranty->id,
+                'warranty_years' => $warranty->warranty_years,
+                'price' => $warranty->price,
+            ];
+        }),
+
+        'gallery' => $product->galleryImages->map(function ($img) {
+            return asset($img->image_url);
+        }),
+
+        'dealers' => $product->dealers->map(function ($dealer) {
+            return [
+                'dealer_name' => $dealer->dealer_name,
+                'price' => $dealer->pivot->price,
+            ];
+        }),
+    ]);
+}
 }

@@ -9,6 +9,7 @@ use App\Services\CheckoutPricingEngine;
 use App\Jobs\SendOrderNotificationJob;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class CartController extends Controller
@@ -23,13 +24,83 @@ class CartController extends Controller
 	$this->pricingEngine = $pricingEngine;
 	$this->orderService = $orderService;
 	}
+	
+	/**
+ * Get active product IDs that are deliverable to the selected pincode.
+ */
+private function getDeliverableProductIds(
+    array $cart,
+    int $selectedPincodeId
+): array {
+    $productIds = collect($cart)
+        ->filter(function ($item) {
+            return is_array($item)
+                && !empty($item['product_id']);
+        })
+        ->pluck('product_id')
+        ->map(fn ($id) => (int) $id)
+        ->unique()
+        ->values();
+
+    if ($productIds->isEmpty()) {
+        return [];
+    }
+
+    return Product::query()
+        ->whereIn('id', $productIds)
+        ->where('is_active', true)
+        ->whereHas('pincodes', function ($query) use ($selectedPincodeId) {
+            $query
+                ->where('pincodes.id', $selectedPincodeId)
+                ->where('pincodes.is_active', true);
+        })
+        ->pluck('id')
+        ->map(fn ($id) => (int) $id)
+        ->all();
+}
+
+/**
+ * Check whether every cart item is valid and deliverable.
+ */
+private function cartHasUnavailableItems(
+    array $cart,
+    int $selectedPincodeId
+): bool {
+    if (empty($cart)) {
+        return false;
+    }
+
+    $validCartItems = collect($cart)
+        ->filter(function ($item) {
+            return is_array($item)
+                && !empty($item['product_id'])
+                && isset($item['price'], $item['quantity']);
+        });
+
+    /*
+     * A malformed cart item must never be allowed into checkout.
+     */
+    if ($validCartItems->count() !== count($cart)) {
+        return true;
+    }
+
+    $deliverableProductIds = $this->getDeliverableProductIds(
+        $cart,
+        $selectedPincodeId
+    );
+
+    return $validCartItems->contains(function ($item) use ($deliverableProductIds) {
+        return !in_array(
+            (int) $item['product_id'],
+            $deliverableProductIds,
+            true
+        );
+    });
+}
 
     /**
      * Add a product/package to the active cart.
      */
-    /**
- * Add a product/package/warranty to the active cart.
- */
 	public function add(Request $request): JsonResponse
 	{
 	$validated = $request->validate([
@@ -53,6 +124,36 @@ class CartController extends Controller
 	 */
 	$product = Product::where('is_active', true)
 		->findOrFail($productId);
+		
+	/*
+ * -------------------------------------------------------------
+ * PINCODE AVAILABILITY
+ * -------------------------------------------------------------
+ *
+ * The customer must have a valid selected pincode.
+ * The selected pincode must be active and assigned to
+ * the selected product.
+ */
+$selectedPincodeId = session('selected_pincode_id');
+
+if (!$selectedPincodeId) {
+    return response()->json([
+        'success' => false,
+        'message' => 'Please select your pincode before adding products to your cart.',
+    ], 422);
+}
+
+$isDeliverable = $product->pincodes()
+    ->where('pincodes.id', $selectedPincodeId)
+    ->where('pincodes.is_active', true)
+    ->exists();
+
+if (!$isDeliverable) {
+    return response()->json([
+        'success' => false,
+        'message' => 'This product is not deliverable to your selected pincode.',
+    ], 422);
+}
 
 	/*
 	 * -------------------------------------------------------------
@@ -218,34 +319,69 @@ class CartController extends Controller
 	}
 
     /**
-     * Render the shopping cart drawer.
-     */
-    public function viewCart(): View
-    {
-        $cart = session()->get('cart', []);
+ * Render the shopping cart drawer.
+ */
+public function viewCart(): View
+{
+    $cart = session()->get('cart', []);
 
-        if (!is_array($cart)) {
-            $cart = [];
-        }
+    if (!is_array($cart)) {
+        $cart = [];
+    }
 
-        $total = 0;
+    $selectedPincodeId = session('selected_pincode_id');
 
-        foreach ($cart as $item) {
-            if (
-                is_array($item) &&
-                isset($item['price'], $item['quantity'])
-            ) {
-                $total +=
-                    (float) $item['price'] *
-                    (int) $item['quantity'];
-            }
-        }
+    $hasUnavailableItems = false;
+    $total = 0;
 
-        return view(
-            'cart.partials.drawer-items',
-            compact('cart', 'total')
+    $deliverableProductIds = [];
+
+    if ($selectedPincodeId) {
+        $deliverableProductIds = $this->getDeliverableProductIds(
+            $cart,
+            (int) $selectedPincodeId
         );
     }
+
+    foreach ($cart as $cartKey => &$item) {
+
+        if (
+            !is_array($item) ||
+            !isset($item['price'], $item['quantity'])
+        ) {
+            $hasUnavailableItems = true;
+            continue;
+        }
+
+        $total +=
+            (float) $item['price'] *
+            (int) $item['quantity'];
+
+        $item['is_deliverable'] =
+            $selectedPincodeId
+            && !empty($item['product_id'])
+            && in_array(
+                (int) $item['product_id'],
+                $deliverableProductIds,
+                true
+            );
+
+        if (!$item['is_deliverable']) {
+            $hasUnavailableItems = true;
+        }
+    }
+
+    unset($item);
+
+    return view(
+        'cart.partials.drawer-items',
+        compact(
+            'cart',
+            'total',
+            'hasUnavailableItems'
+        )
+    );
+}
 
     /**
      * Remove an item from the cart.
@@ -270,115 +406,204 @@ class CartController extends Controller
         ]);
     }
 
-    /**
-     * Render checkout.
+ /**
+ * Render checkout.
+ */
+public function showCheckoutPage(): View|RedirectResponse
+{
+    $cart = session()->get('cart', []);
+
+    /*
+     * -------------------------------------------------------------
+     * EMPTY CART
+     * -------------------------------------------------------------
      */
-	public function showCheckoutPage()
-	{
-	$cart = session()->get('cart', []);
+    if (!is_array($cart) || empty($cart)) {
+        return redirect()
+            ->route('home')
+            ->with(
+                'warning',
+                'Your basket is currently empty.'
+            );
+    }
 
-	if (empty($cart)) {
-		return redirect()
-			->route('home')
-			->with(
-				'warning',
-				'Your basket is currently empty.'
-			);
-	}
-
-	$invoiceSummary = $this->pricingEngine
-		->calculateInvoiceSummary(
-			$cart,
-			false
-		);
-
-	return view(
-		'checkout.index',
-		[
-			'cart' => $cart,
-
-			'subtotal' =>
-				$invoiceSummary['unit_price_subtotal'],
-
-			'gst' =>
-				$invoiceSummary['gst_tax_amount'],
-
-			'finalPayable' =>
-				$invoiceSummary['final_payable_amount'],
-
-			'taxName' =>
-				$invoiceSummary['tax_name'],
-
-			'taxRate' =>
-				$invoiceSummary['tax_rate'],
-				
-			'taxEnabled' =>
-			    $invoiceSummary['tax_enabled'],
-		]
-	);
-	}
-
-    /**
-     * Return checkout calculation summary.
+    /*
+     * -------------------------------------------------------------
+     * SELECTED PINCODE
+     * -------------------------------------------------------------
      */
-    public function getCheckoutCalculationSummary(
-        Request $request
-    ): JsonResponse {
-        $cart = session()->get('cart', []);
+    $selectedPincodeId = session('selected_pincode_id');
 
-        $wantsInstallation = $request->boolean(
-            'installation_required',
+    if (!$selectedPincodeId) {
+        return redirect()
+            ->route('home')
+            ->with(
+                'error',
+                'Please select your pincode before continuing to checkout.'
+            );
+    }
+
+    /*
+     * -------------------------------------------------------------
+     * CART PINCODE AVAILABILITY
+     * -------------------------------------------------------------
+     */
+    if (
+        $this->cartHasUnavailableItems(
+            $cart,
+            (int) $selectedPincodeId
+        )
+    ) {
+        return redirect()
+            ->route('home')
+            ->with(
+                'error',
+                'Some items in your cart are not deliverable to your selected pincode. Please remove them or change your location to continue.'
+            );
+    }
+
+    /*
+     * -------------------------------------------------------------
+     * INVOICE CALCULATION
+     * -------------------------------------------------------------
+     */
+    $invoiceSummary = $this->pricingEngine
+        ->calculateInvoiceSummary(
+            $cart,
             false
         );
 
-        $invoiceSummary =
-            $this->pricingEngine->calculateInvoiceSummary(
-                $cart,
-                $wantsInstallation
-            );
+    return view(
+        'checkout.index',
+        [
+            'cart' => $cart,
 
+            'subtotal' =>
+                $invoiceSummary['unit_price_subtotal'],
+
+            'gst' =>
+                $invoiceSummary['gst_tax_amount'],
+
+            'finalPayable' =>
+                $invoiceSummary['final_payable_amount'],
+
+            'taxName' =>
+                $invoiceSummary['tax_name'],
+
+            'taxRate' =>
+                $invoiceSummary['tax_rate'],
+
+            'taxEnabled' =>
+                $invoiceSummary['tax_enabled'],
+        ]
+    );
+}
+
+    /**
+ * Return checkout calculation summary.
+ */
+public function getCheckoutCalculationSummary(
+    Request $request
+): JsonResponse {
+    $cart = session()->get('cart', []);
+
+    /*
+     * -------------------------------------------------------------
+     * CART
+     * -------------------------------------------------------------
+     */
+    if (!is_array($cart) || empty($cart)) {
         return response()->json([
-            'success' => true,
-
-            'summary' => [
-                'subtotal' => number_format(
-                    $invoiceSummary['unit_price_subtotal'],
-                    2
-                ),
-
-                'gst' => number_format(
-                    $invoiceSummary['gst_tax_amount'],
-                    2
-                ),
-				
-				'tax_name' => $invoiceSummary['tax_name'],
-
-				'tax_rate' => $invoiceSummary['tax_rate'],
-				
-				'tax_enabled' => $invoiceSummary['tax_enabled'],
-
-                'delivery' => number_format(
-                    $invoiceSummary['delivery_charges'],
-                    2
-                ),
-
-                'installation' => number_format(
-                    $invoiceSummary['installation_charges'],
-                    2
-                ),
-
-                'discounts' => number_format(
-                    $invoiceSummary['discount_deductions'],
-                    2
-                ),
-
-                'final_payable' => number_format(
-                    $invoiceSummary['final_payable_amount'],
-                    2
-                ),
-            ],
-        ]);
+            'success' => false,
+            'message' => 'Your cart is empty.',
+        ], 422);
     }
+
+    /*
+     * -------------------------------------------------------------
+     * SELECTED PINCODE
+     * -------------------------------------------------------------
+     */
+    $selectedPincodeId = session('selected_pincode_id');
+
+    if (!$selectedPincodeId) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Please select your pincode before continuing.',
+        ], 422);
+    }
+
+    /*
+     * -------------------------------------------------------------
+     * CART PINCODE AVAILABILITY
+     * -------------------------------------------------------------
+     */
+    if (
+        $this->cartHasUnavailableItems(
+            $cart,
+            (int) $selectedPincodeId
+        )
+    ) {
+        return response()->json([
+            'success' => false,
+            'message' =>
+                'Some items in your cart are not deliverable to your selected pincode. Please remove them or change your location to continue.',
+        ], 422);
+    }
+
+    $wantsInstallation = $request->boolean(
+        'installation_required',
+        false
+    );
+
+    $invoiceSummary =
+        $this->pricingEngine->calculateInvoiceSummary(
+            $cart,
+            $wantsInstallation
+        );
+
+    return response()->json([
+        'success' => true,
+
+        'summary' => [
+            'subtotal' => number_format(
+                $invoiceSummary['unit_price_subtotal'],
+                2
+            ),
+
+            'gst' => number_format(
+                $invoiceSummary['gst_tax_amount'],
+                2
+            ),
+
+            'tax_name' => $invoiceSummary['tax_name'],
+
+            'tax_rate' => $invoiceSummary['tax_rate'],
+
+            'tax_enabled' => $invoiceSummary['tax_enabled'],
+
+            'delivery' => number_format(
+                $invoiceSummary['delivery_charges'],
+                2
+            ),
+
+            'installation' => number_format(
+                $invoiceSummary['installation_charges'],
+                2
+            ),
+
+            'discounts' => number_format(
+                $invoiceSummary['discount_deductions'],
+                2
+            ),
+
+            'final_payable' => number_format(
+                $invoiceSummary['final_payable_amount'],
+                2
+            ),
+        ],
+    ]);
+}
 	
 	/**
  * Place a Cash on Delivery order.
@@ -442,8 +667,7 @@ public function placeOrder(Request $request): JsonResponse
 
         'pincode' => [
             'required',
-            'string',
-            'max:10',
+            'digits:6',
         ],
 
         'payment_method' => [
@@ -460,6 +684,33 @@ public function placeOrder(Request $request): JsonResponse
 
     /*
      * -------------------------------------------------------------
+     * SELECTED SHOPPING PINCODE
+     * -------------------------------------------------------------
+     */
+    $selectedPincodeId = session('selected_pincode_id');
+    $selectedPincode = session('selected_pincode');
+
+    if (!$selectedPincodeId || !$selectedPincode) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Please select your pincode before placing the order.',
+        ], 422);
+    }
+
+    /*
+     * -------------------------------------------------------------
+     * DELIVERY ADDRESS PINCODE MUST MATCH
+     * -------------------------------------------------------------
+     */
+    if ((string) $validated['pincode'] !== (string) $selectedPincode) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Your delivery address pincode must match your selected shopping pincode.',
+        ], 422);
+    }
+
+    /*
+     * -------------------------------------------------------------
      * CART
      * -------------------------------------------------------------
      */
@@ -469,6 +720,28 @@ public function placeOrder(Request $request): JsonResponse
         return response()->json([
             'success' => false,
             'message' => 'Your cart is empty.',
+        ], 422);
+    }
+
+    /*
+     * -------------------------------------------------------------
+     * CART PINCODE AVAILABILITY
+     * -------------------------------------------------------------
+     *
+     * Final server-side availability check.
+     *
+     * This uses the centralized cart availability helper instead
+     * of running a separate database query for every cart item.
+     */
+    if (
+        $this->cartHasUnavailableItems(
+            $cart,
+            (int) $selectedPincodeId
+        )
+    ) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Some items in your cart are not deliverable to your selected pincode. Please remove them or change your location to continue.',
         ], 422);
     }
 
@@ -493,8 +766,8 @@ public function placeOrder(Request $request): JsonResponse
             $cart,
             (bool) ($validated['installation_required'] ?? false)
         );
-		
-		SendOrderNotificationJob::dispatch($order->id);
+
+        SendOrderNotificationJob::dispatch($order->id);
 
         return response()->json([
             'success' => true,
@@ -611,6 +884,49 @@ public function placeOrder(Request $request): JsonResponse
 		'order.success',
 		compact('order')
 	);
+	}
+	public function saveForLater(Request $request): JsonResponse
+	{
+	$cartKey = $request->validate([
+		'cart_key' => ['required', 'string'],
+	])['cart_key'];
+
+	$cart = session()->get('cart', []);
+
+	if (!is_array($cart) || !array_key_exists($cartKey, $cart)) {
+		return response()->json([
+			'success' => false,
+			'message' => 'Cart item not found.',
+		], 404);
+	}
+
+	$item = $cart[$cartKey];
+
+	$savedItems = session()->get('saved_for_later', []);
+
+	if (!is_array($savedItems)) {
+		$savedItems = [];
+	}
+
+	/*
+	 * Prevent duplicate saved items.
+	 */
+	if (!array_key_exists($cartKey, $savedItems)) {
+		$savedItems[$cartKey] = $item;
+	}
+
+	/*
+	 * Remove the item from the active cart.
+	 */
+	unset($cart[$cartKey]);
+
+	session()->put('cart', $cart);
+	session()->put('saved_for_later', $savedItems);
+
+	return response()->json([
+		'success' => true,
+		'message' => 'Item saved for later.',
+	]);
 	}
 }
 

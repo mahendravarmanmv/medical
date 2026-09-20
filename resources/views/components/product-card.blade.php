@@ -1,4 +1,7 @@
-@props(['product'])
+@props([
+    'product',
+    'isDeliverable' => true,
+])
 <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 mb-4">
     <div class="card h-100 border border-1 border-light-subtle rounded-2 shadow-sm position-relative d-flex flex-column bg-white">
 
@@ -105,12 +108,23 @@
             <div class="d-flex flex-column gap-2">
 			@if($product->stock_quantity === null || $product->stock_quantity > 0)
 
+			@if($isDeliverable)
 			<button
 			class="btn btn-primary w-100 add-to-cart-btn fw-semibold rounded-1 py-2 d-flex align-items-center justify-content-center gap-2 text-white border-0"
 			data-id="{{ $product->id }}"
 			>
 			<i class="bi bi-cart3 fs-6"></i> Add to Cart
 			</button>
+			@else
+			<button
+			type="button"
+			class="btn btn-secondary w-100 fw-semibold rounded-1 py-2 d-flex align-items-center justify-content-center gap-2 text-white border-0"
+			disabled
+			>
+			<i class="bi bi-geo-alt fs-6"></i>
+			Not deliverable to your location
+			</button>
+			@endif
 
 			@else
 

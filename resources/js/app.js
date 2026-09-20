@@ -309,6 +309,91 @@ $(document).ready(function () {
             }
         });
     });
+	
+	document.addEventListener('click', async function (event) {
+
+	const button = event.target.closest('.save-for-later-btn');
+
+	if (!button) {
+		return;
+	}
+
+	const cartKey = button.dataset.id;
+
+	if (!cartKey) {
+		return;
+	}
+
+	button.disabled = true;
+
+	const originalText = button.textContent.trim();
+
+	button.textContent = 'Saving...';
+
+	try {
+
+		const response = await fetch('/cart/save-for-later', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept': 'application/json',
+				'X-CSRF-TOKEN': document
+					.querySelector('meta[name="csrf-token"]')
+					.getAttribute('content')
+			},
+			body: JSON.stringify({
+				cart_key: cartKey
+			})
+		});
+
+		const data = await response.json();
+
+		if (!response.ok || !data.success) {
+			throw new Error(
+				data.message || 'Unable to save this item.'
+			);
+		}
+
+		/*
+		 * Refresh the cart drawer using the existing cart
+		 * rendering flow.
+		 */
+		const cartResponse = await fetch('/cart/view', {
+			headers: {
+				'Accept': 'text/html'
+			}
+		});
+
+		if (cartResponse.ok) {
+
+			const cartHtml = await cartResponse.text();
+
+			/*
+			 * Use your existing cart drawer container here.
+			 *
+			 * If your existing cart refresh function already exists,
+			 * use that function instead of this replacement.
+			 */
+		}
+
+		/*
+		 * Simplest and safest approach for now:
+		 * reload the page so all cart/session state is fresh.
+		 */
+		window.location.reload();
+
+	} catch (error) {
+
+		console.error(
+			'Save for later error:',
+			error
+		);
+
+		button.disabled = false;
+		button.textContent = originalText;
+
+	}
+	});
 
     // -------------------------------------------------------------------------
     // 5. URL QUERY PARAMETER AUTH TAB MANAGER
@@ -794,4 +879,218 @@ $(document).on('click', '.warranty-variant-card', function () {
             }
         }
     });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Mandatory Shopping Pincode
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const pincodeModalElement =
+        document.getElementById('pincodeModal');
+
+    const pincodeForm =
+        document.getElementById('pincode-form');
+
+    const pincodeInput =
+        document.getElementById('selected-pincode');
+
+    const pincodeError =
+        document.getElementById('pincode-error');
+
+    const pincodeSubmit =
+        document.getElementById('pincode-submit');
+
+    if (
+        !pincodeModalElement ||
+        !pincodeForm ||
+        !pincodeInput ||
+        !pincodeError ||
+        !pincodeSubmit
+    ) {
+        return;
+    }
+
+    const pincodeModal =
+        new bootstrap.Modal(
+            pincodeModalElement,
+            {
+                backdrop: 'static',
+                keyboard: false
+            }
+        );
+
+
+    /*
+     * Only allow numeric characters.
+     */
+    pincodeInput.addEventListener('input', function () {
+
+        this.value = this.value
+            .replace(/\D/g, '')
+            .slice(0, 6);
+
+        pincodeError.classList.add('d-none');
+        pincodeError.textContent = '';
+
+    });
+
+
+    /*
+     * Show the mandatory modal.
+     */
+    function showPincodeModal() {
+
+        pincodeModal.show();
+
+        setTimeout(function () {
+            pincodeInput.focus();
+        }, 300);
+
+    }
+
+
+    /*
+     * Submit selected pincode.
+     */
+    pincodeForm.addEventListener('submit', async function (event) {
+
+        event.preventDefault();
+
+        const pincode =
+            pincodeInput.value.trim();
+
+        /*
+         * Client-side format validation.
+         */
+        if (!/^\d{6}$/.test(pincode)) {
+
+            pincodeError.textContent =
+                'Please enter a valid 6-digit pincode.';
+
+            pincodeError.classList.remove('d-none');
+
+            pincodeInput.focus();
+
+            return;
+        }
+
+
+        /*
+         * Disable submit button.
+         */
+        pincodeSubmit.disabled = true;
+
+        pincodeSubmit
+            .querySelector('.pincode-submit-text')
+            .classList.add('d-none');
+
+        pincodeSubmit
+            .querySelector('.pincode-submit-loading')
+            .classList.remove('d-none');
+
+        pincodeError.classList.add('d-none');
+
+
+        try {
+
+				const pincodeSelectUrl =
+				pincodeModalElement.dataset.pincodeSelectUrl;
+
+				const response = await fetch(
+				pincodeSelectUrl,
+                {
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type':
+                            'application/json',
+
+                        'Accept':
+                            'application/json',
+
+                        'X-CSRF-TOKEN':
+                            document
+                                .querySelector(
+                                    'meta[name="csrf-token"]'
+                                )
+                                .getAttribute('content')
+                    },
+
+                    body: JSON.stringify({
+                        pincode: pincode
+                    })
+                }
+            );
+
+
+            const data = await response.json();
+
+
+            if (!response.ok || !data.success) {
+
+                pincodeError.textContent =
+                    data.message ||
+                    'Sorry this pin code is not servicable';
+
+                pincodeError.classList.remove('d-none');
+
+                return;
+            }
+
+
+            /*
+             * Pincode successfully stored in session.
+             */
+            pincodeModal.hide();
+
+            /*
+             * Reload so all page-level components can
+             * use the newly selected pincode.
+             */
+            window.location.reload();
+
+        } catch (error) {
+
+            console.error(
+                'Pincode selection error:',
+                error
+            );
+
+            pincodeError.textContent =
+                'Something went wrong. Please try again.';
+
+            pincodeError.classList.remove('d-none');
+
+        } finally {
+
+            pincodeSubmit.disabled = false;
+
+            pincodeSubmit
+                .querySelector('.pincode-submit-text')
+                .classList.remove('d-none');
+
+            pincodeSubmit
+                .querySelector('.pincode-submit-loading')
+                .classList.add('d-none');
+
+        }
+
+    });
+
+
+    /*
+     * Check whether a shopping pincode already exists.
+     */
+    const hasSelectedPincode =
+    pincodeModalElement.dataset.hasSelectedPincode === '1';
+
+
+    if (!hasSelectedPincode) {
+        showPincodeModal();
+    }
+
 });

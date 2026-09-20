@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Pincode;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
@@ -65,5 +67,13 @@ class Product extends Model
 	return $this->belongsToMany(Dealer::class)
 				->withPivot('price')
 				->withTimestamps();
+	}
+	
+	public function pincodes(): BelongsToMany
+	{
+	return $this->belongsToMany(
+		Pincode::class,
+		'pincode_product'
+	)->withTimestamps();
 	}
 }

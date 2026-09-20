@@ -184,10 +184,12 @@ class OrderService
                     'line_total' => $lineTotal,
                 ]);
 				
+				if ($product->stock_quantity !== null) {
 				$product->decrement(
 				'stock_quantity',
 				$quantity
 				);
+				}
             }
 
             /*
@@ -283,9 +285,11 @@ class OrderService
 
         foreach ($cart as $cartKey => $cartItem) {
 
-            if (!is_array($cartItem)) {
-                continue;
-            }
+		if (!is_array($cartItem)) {
+		throw ValidationException::withMessages([
+		'cart' => 'One of the items in your cart is invalid.',
+		]);
+		}
 
             $productId =
                 isset($cartItem['product_id'])
@@ -325,14 +329,15 @@ class OrderService
              * STOCK VALIDATION
              * ---------------------------------------------------------
              */
-            if (
-                $quantity > (int) $product->stock_quantity
-            ) {
-                throw ValidationException::withMessages([
-                    'cart' =>
-                        "Only {$product->stock_quantity} unit(s) of {$product->title} are available.",
-                ]);
-            }
+			if (
+			$product->stock_quantity !== null &&
+			$quantity > (int) $product->stock_quantity
+			) {
+			throw ValidationException::withMessages([
+			'cart' =>
+			"Only {$product->stock_quantity} unit(s) of {$product->title} are available.",
+			]);
+			}
 
             /*
              * ---------------------------------------------------------

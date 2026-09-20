@@ -85,3 +85,8 @@ html {
 .z-1050 {
     z-index: 1050;
 }
+.desktop-banner {
+    width: 100%;
+    height: 350px;
+    display: block;
+}
