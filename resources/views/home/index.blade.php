@@ -1,78 +1,111 @@
 <x-layout title="Sleep Better, Live Better | SleepWell">
 
-    <section id="heroBannerCarousel" class="carousel slide carousel-fade w-100 mb-5" data-bs-ride="carousel">
+   <section class="w-100 mb-5 position-relative overflow-hidden" 
+         style="background: radial-gradient(circle at 75% 30%, #0d2854 0%, #051025 60%, #020712 100%); color: #ffffff; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
 
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#heroBannerCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#heroBannerCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#heroBannerCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
-        </div>
+    <div class="container py-1 py-lg-2">
 
-        <div class="carousel-inner">
+        <div class="row align-items-center">
 
-    <!-- BANNER ITEM 1 -->
-    <div class="carousel-item active position-relative w-100">
+            {{-- LEFT: CONTENT --}}
+            <div class="col-lg-6 mb-4 mb-lg-0">
 
-        <!-- Desktop View -->
-        <img src="{{ asset('images/banners/banner1.jpeg') }}"
-     class="w-100 d-none d-md-block desktop-banner"
-     alt="SleepQ Desktop Banner 1">
+                <div class="pe-lg-4">
 
-        <!-- Mobile View -->
-        <img src="{{ asset('images/banners/banner2.jpeg') }}"
-             class="w-100 h-auto d-block d-md-none"
-             alt="SleepQ Mobile Banner 1">
+                    {{-- Brand Logo (Optional / as per design) --}}
+                    <div class="mb-4">
+                        <img src="{{ asset('images/resmed-logo-white.svg') }}" alt="ResMed" style="height: 28px;" onerror="this.style.display='none'">
+                    </div>
 
-        <!-- Dynamic Interactive Overlay -->
-        <div class="position-absolute bottom-0 start-0 w-100 p-4 z-2">
-            <div class="container px-0 text-start">
-                <div class="d-flex gap-3 mt-4">
-                    {{-- <a href="#" class="btn btn-dark btn-lg rounded-pill px-5 fs-6 fw-bold shadow-sm">
-                        Shop Now
-                    </a> --}}
+                    {{-- Main Headings --}}
+                    <h1 class="fw-bold display-4 lh-1 mb-2 text-white" style="letter-spacing: -0.02em;">
+                        Sleep Better.
+                    </h1>
+
+                    <h2 class="fw-bold display-4 lh-1 mb-3" style="color: #0076fe; letter-spacing: -0.02em;">
+                        Live Better.
+                    </h2>
+
+                    {{-- Subheading --}}
+                    <h5 class="fw-normal mb-4" style="color: #8da4c4; font-size: 1.15rem;">
+                        Powered by <span class="text-white fw-semibold">AirSense™ 11</span>
+                    </h5>
+
+                    {{-- Description --}}
+                    <p class="mb-4" style="color: #a3b8d2; font-size: 0.95rem; line-height: 1.6; max-width: 480px;">
+                        Advanced sleep apnea therapy with intelligent technology designed to make your treatment simple, comfortable, and effective.
+                    </p>
+
+                    {{-- FEATURES --}}
+                    <div class="row row-cols-4 g-2 pt-2 mb-4 text-start">
+
+                        {{-- Feature 1 --}}
+                        <div class="col">
+                            <div class="mb-2">
+                                <i class="far fa-hand-pointer fs-4" style="color: #9cb5d6;"></i>
+                            </div>
+                            <div class="lh-sm" style="font-size: 0.78rem; color: #d0deee; font-weight: 500;">
+                                Smart<br>Touchscreen
+                            </div>
+                        </div>
+
+                        {{-- Feature 2 --}}
+                        <div class="col">
+                            <div class="mb-2">
+                                <i class="fas fa-sliders-h fs-4" style="color: #9cb5d6;"></i>
+                            </div>
+                            <div class="lh-sm" style="font-size: 0.78rem; color: #d0deee; font-weight: 500;">
+                                AutoSet™<br>Technology
+                            </div>
+                        </div>
+
+                        {{-- Feature 3 --}}
+                        <div class="col">
+                            <div class="mb-2">
+                                <i class="fas fa-mobile-alt fs-4" style="color: #9cb5d6;"></i>
+                            </div>
+                            <div class="lh-sm" style="font-size: 0.78rem; color: #d0deee; font-weight: 500;">
+                                myAir™ App<br>Connectivity
+                            </div>
+                        </div>
+
+                        {{-- Feature 4 --}}
+                        <div class="col">
+                            <div class="mb-2">
+                                <i class="fas fa-tint fs-4" style="color: #9cb5d6;"></i>
+                            </div>
+                            <div class="lh-sm" style="font-size: 0.78rem; color: #d0deee; font-weight: 500;">
+                                Integrated<br>Heated Humidifier
+                            </div>
+                        </div>
+
+                    </div>
+
+                    
+
+                </div>
+
+            </div>
+
+            {{-- RIGHT: IMAGE --}}
+            <div class="col-lg-6">
+                <div class="text-center text-lg-end">
+                    <img
+                        src="{{ asset('images/banners/banner-right.webp') }}"
+                        class="img-fluid"
+                        alt="SleepQ AirSense 11"
+                        style="max-height: 480px; object-fit: contain;"
+                    >
                 </div>
             </div>
+
         </div>
+
+        
 
     </div>
 
-
-    <!-- BANNER ITEM 2 -->
-    <div class="carousel-item position-relative w-100">
-
-        <!-- Desktop View -->
-        <img src="{{ asset('images/banners/banner3.png') }}"
-     class="w-100 d-none d-md-block desktop-banner"
-     alt="SleepQ Desktop Banner 1">
-
-        <!-- Mobile View -->
-        <img src="{{ asset('images/banners/banner1.jpeg') }}"
-             class="w-100 h-auto d-block d-md-none"
-             alt="SleepQ Mobile Banner 2">
-
-        <div class="position-absolute bottom-0 start-0 w-100 p-4 z-2">
-            <div class="container px-0 text-start">
-                <div class="d-flex gap-3 mt-4">
-                    {{-- <a href="#" class="btn btn-dark btn-lg rounded-pill px-5 fs-6 fw-bold shadow-sm">
-                        Explore Masks
-                    </a> --}}
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-</div>
-
-        <button class="carousel-control-prev w-5 z-3" type="button" data-bs-target="#heroBannerCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon p-3 bg-dark bg-opacity-25 rounded-circle" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next w-5 z-3" type="button" data-bs-target="#heroBannerCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon p-3 bg-dark bg-opacity-25 rounded-circle" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </section>
+</section>
 
     <section class="container mb-4">
     {{-- <section class="container-fluid px-lg-5 mb-4"> --}}
